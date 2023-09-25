@@ -1,0 +1,2 @@
+_ZN2al16isPadTriggerDownEi = __main_start + 0x005d0200;
+_ZN2al14isPadTriggerUpEi = __main_start + 0x005d0150;

@@ -1,4 +1,8 @@
+#include "al/Library/Memory/MemorySystem.h"
+#include "al/Library/Sequence/Sequence.h"
 #include "diag/assert.hpp"
+#include "heap/seadExpHeap.h"
+#include "heap/seadHeapMgr.h"
 #include "hook/trampoline.hpp"
 #include "lib.hpp"
 #include "nn/fs.h"
@@ -15,17 +19,21 @@ void FileDeviceMgrCtor::Callback(sead::FileDeviceMgr* thisPtr)
     thisPtr->mMountedSd = nn::fs::MountSdCardForDebug("sd").IsSuccess();
 }
 
-class ProductSequence;
-HOOK_DEFINE_TRAMPOLINE(ProductSequenceInit) { static void Callback(ProductSequence * thisPtr); };
-void ProductSequenceInit::Callback(ProductSequence* thisPtr)
+class HakoniwaSequence;
+HOOK_DEFINE_TRAMPOLINE(HakoniwaSequenceInit) { static void Callback(HakoniwaSequence * thisPtr, const al::SequenceInitInfo& info); };
+void HakoniwaSequenceInit::Callback(HakoniwaSequence* thisPtr, const al::SequenceInitInfo& info)
 {
-    Orig(thisPtr);
+    Orig(thisPtr, info);
 
+    pe::getMenuHeap() = sead::ExpHeap::create(1024 * 1024 * 1, "MenuHeap", al::getSequenceHeap(), 8, sead::ExpHeap::cHeapDirection_Forward, false);
+
+    sead::ScopedCurrentHeapSetter setter(pe::getMenuHeap());
     pe::Menu::createInstance(nullptr);
 }
 
-void drawDbgGui()
+static void drawDbgGui()
 {
+    sead::ScopedCurrentHeapSetter setter(pe::getMenuHeap());
     auto* menu = pe::Menu::instance();
     if (menu)
         menu->draw();
@@ -39,6 +47,7 @@ extern "C" void exl_main(void* x0, void* x1)
     using namespace exl::patch::inst;
 
     FileDeviceMgrCtor::InstallAtOffset(pe::offsets::FileDeviceMgrCtorHookLocation);
+    HakoniwaSequenceInit::InstallAtOffset(pe::offsets::HakoniwaSequenceHookLocation);
 
     nvnImGui::InstallHooks();
     nvnImGui::addDrawFunc(drawDbgGui);

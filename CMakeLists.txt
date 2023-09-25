@@ -47,6 +47,7 @@ set (INCLUDE_DIRS
   ${PROJECT_SOURCE_DIR}/lib/imgui
   ${PROJECT_SOURCE_DIR}/lib/odyssey/lib
   ${PROJECT_SOURCE_DIR}/lib/odyssey/src
+  ${PROJECT_SOURCE_DIR}/lib/odyssey/lib/agl/include
 )
 include_directories(${INCLUDE_DIRS})
 
@@ -63,8 +64,8 @@ include(${CMAKE_SOURCE_DIR}/cmake/SwitchTools.cmake)
 set(CMAKE_EXECUTABLE_SUFFIX ".nss")
 add_executable(subsdk9 ${SOURCES_ASM} ${SOURCES_C} ${SOURCES_CXX} ${IMGUI_SOURCES})
 
-target_embed_binaries(subsdk9 "${PROJECT_SOURCE_DIR}/data/imgui.bin")
-target_embed_binaries(subsdk9 "${PROJECT_SOURCE_DIR}/data/SFMonoSquare-Regular.otf")
+#target_embed_binaries(subsdk9 "${PROJECT_SOURCE_DIR}/data/imgui.bin")
+#target_embed_binaries(subsdk9 "${PROJECT_SOURCE_DIR}/data/SFMonoSquare-Regular.otf")
 
 ## Prepare subsdk ld
 set(SUBSDK_LD_PATH ${CMAKE_CURRENT_SOURCE_DIR}/module/subsdk9.ld)

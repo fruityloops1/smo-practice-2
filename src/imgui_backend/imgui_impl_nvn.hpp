@@ -108,6 +108,8 @@ void setRenderStates();
 
 void renderDrawData(ImDrawData* drawData);
 
+// ImTextureID loadTextureRGBA32(const ImU32* texture, int width, int height);
+
 NvnBackendData* getBackendData();
 }; // namespace ImguiNvnBackend
 

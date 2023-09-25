@@ -186,7 +186,7 @@ void nvnImGui::procDraw()
     ImguiNvnBackend::newFrame();
 
     if (sDisableRender)
-        return;    
+        return;
     ImGui::NewFrame();
 
     for (auto drawFunc : drawQueue) {

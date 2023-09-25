@@ -14,11 +14,15 @@ UserConfig& getConfig()
 
 void loadConfig()
 {
+    if (!FsHelper::isFileExist(sUserConfigPath)) {
+        saveConfig();
+        return;
+    }
+
     FsHelper::LoadData data;
     data.path = sUserConfigPath;
     FsHelper::loadFileFromPath(data);
-    if (data.buffer != nullptr)
-    {
+    if (data.buffer != nullptr) {
         UserConfig* configData = reinterpret_cast<UserConfig*>(data.buffer);
         sConfig = *configData;
     }

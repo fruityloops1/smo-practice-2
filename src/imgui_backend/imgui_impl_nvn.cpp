@@ -4,8 +4,6 @@
 #include "imgui_hid_mappings.h"
 #include "lib.hpp"
 #include <cmath>
-#include "imgui_bin.h"
-#include "SFMonoSquare_Regular_otf.h"
 
 #include "nn/hid.h"
 
@@ -240,14 +238,14 @@ bool createShaders()
 
     } else {
 
-        /*FsHelper::LoadData loadData = {
+        FsHelper::LoadData loadData = {
             .path = "sd:/Peepa/ImGuiData/imgui.bin"
         };
 
-        FsHelper::loadFileFromPath(loadData);*/
+        FsHelper::loadFileFromPath(loadData);
 
-        bd->imguiShaderBinary.size = imgui_bin_size;
-        bd->imguiShaderBinary.ptr = (u8*)imgui_bin;
+        bd->imguiShaderBinary.size = loadData.bufSize;
+        bd->imguiShaderBinary.ptr = (u8*)loadData.buffer;
     }
 
     if (bd->imguiShaderBinary.size > 0) {
@@ -344,6 +342,70 @@ bool setupFont()
     return true;
 }
 
+// idfk what im doing
+/*
+ImVector<nvn::TextureHandle> sTextureHandles;
+int sTextureIdCounter = 5954530;
+
+ImTextureID loadTextureRGBA32(const ImU32* texture, int width, int height)
+{
+    auto bd = getBackendData();
+
+    // get texture size
+    int texSize = width * height * sizeof(ImU32);
+    nvn::MemoryPool memPool;
+    if (!MemoryPoolMaker::createPool(&memPool, ALIGN_UP(texSize, 0x1000),
+            nvn::MemoryPoolFlags::CPU_UNCACHED | nvn::MemoryPoolFlags::GPU_CACHED)) {
+        return nullptr;
+    }
+
+    bd->texBuilder.SetDefaults()
+        .SetDevice(bd->device)
+        .SetTarget(nvn::TextureTarget::TARGET_2D)
+        .SetFormat(nvn::Format::RGBA8)
+        .SetSize2D(width, height)
+        .SetStorage(&memPool, 0);
+
+    // initialize texture
+    nvn::Texture nvnTexture;
+    if (!nvnTexture.Initialize(&bd->texBuilder)) {
+        return 0;
+    }
+
+    // copy pixel data
+    nvn::CopyRegion region = {
+        .xoffset = 0,
+        .yoffset = 0,
+        .width = width,
+        .height = height,
+        .depth = 1
+    };
+    nvnTexture.WriteTexels(nullptr, &region, texture);
+    nvnTexture.FlushTexels(nullptr, &region);
+
+    // setup sampler
+    bd->samplerBuilder.SetDefaults()
+        .SetDevice(bd->device)
+        .SetMinMagFilter(nvn::MinFilter::LINEAR, nvn::MagFilter::LINEAR)
+        .SetWrapMode(nvn::WrapMode::CLAMP, nvn::WrapMode::CLAMP, nvn::WrapMode::CLAMP);
+
+    nvn::Sampler sampler;
+    if (!sampler.Initialize(&bd->samplerBuilder)) {
+        return 0;
+    }
+
+    // register with pools
+    int texId = sTextureIdCounter;
+    int sampId = sTextureIdCounter;
+    bd->texPool.RegisterTexture(texId, &nvnTexture, nullptr);
+    bd->samplerPool.RegisterSampler(sampId, &sampler);
+
+    sTextureIdCounter++;
+    sTextureHandles.push_back(bd->device->GetTextureHandle(texId, sampId));
+    return &sTextureHandles.Data[sTextureHandles.size() - 1];
+}
+*/
+
 bool setupShaders(u8* shaderBinary, ulong binarySize)
 {
 
@@ -404,7 +466,7 @@ void InitBackend(const NvnBackendInitInfo& initInfo)
     io.BackendPlatformName = "Switch";
     io.BackendRendererName = "imgui_impl_nvn";
     io.IniFilename = nullptr;
-    io.MouseDrawCursor = true;
+    io.MouseDrawCursor = false;
     io.ConfigFlags |= ImGuiConfigFlags_IsTouchScreen;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
     io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
@@ -421,18 +483,26 @@ void InitBackend(const NvnBackendInitInfo& initInfo)
 
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-    /*FsHelper::LoadData loadData = {
+    FsHelper::LoadData loadData = {
         .path = "sd:/Peepa/ImGuiData/Fonts/SFMonoSquare-Regular.otf"
     };
 
     FsHelper::loadFileFromPath(loadData);
-*/
 
-    static exl::util::RwPages fontPage(uintptr_t(SFMonoSquare_Regular_otf), SFMonoSquare_Regular_otf_size);
-    
+    ImVector<ImWchar> ranges;
+    ImFontGlyphRangesBuilder builder;
+    builder.AddText(
+        " "
+        "abcdefghikjlmnopqrstuvwxyz"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "0123456789"
+        "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽぁぃぅぇぉゃゅょっぉゕぁぃぅぇぉァアィイゥェォカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ"
+        "ッーㇰㇱㇲㇳㇴㇵㇶㇷㇸㇹㇺㇻㇼㇽㇾㇿ"
+        "！、"
+        "!\"§$%&/()=?´`^°#+-·.,;:_'*\\}][{");
+    builder.BuildRanges(&ranges);
 
-    io.Fonts->AddFontFromMemoryTTF(reinterpret_cast<void*>(fontPage.GetRw()), SFMonoSquare_Regular_otf_size, 17, nullptr, io.Fonts->GetGlyphRangesJapanese());
-
+    io.Fonts->AddFontFromMemoryTTF(loadData.buffer, loadData.bufSize, 50, nullptr, ranges.Data);
     ImGuiStyle& style = ImGui::GetStyle();
     ImVec4* colors = style.Colors;
 
