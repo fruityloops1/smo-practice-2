@@ -1,0 +1,13 @@
+[submodule "lib/sead"]
+	path = lib/sead
+	url = https://github.com/open-ead/sead
+[submodule "NintendoSDK"]
+	path = lib/NintendoSDK
+	url = https://github.com/fruityloops1/nnheaders
+[submodule "lib/odyssey"]
+	path = lib/odyssey
+	url = https://github.com/odyssey-modding/odyssey
+[submodule "lib/imgui"]
+	path = lib/imgui
+	url = https://github.com/ocornut/imgui
+	branch = docking
