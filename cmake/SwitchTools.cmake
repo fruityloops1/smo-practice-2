@@ -146,7 +146,7 @@ macro(__add_binary_library target)
         string(REGEX REPLACE "[-./]" "_" __BINARY_FILE ${__BINARY_FILE})
 
         # Generate the header.
-        configure_file(${__SWITCH_TOOLS_DIR}/bin2s_header.h.in ${CMAKE_CURRENT_BINARY_DIR}/bin2s_include/${__BINARY_FILE}.h)
+        configure_file(cmake/bin2s_header.h.in ${CMAKE_CURRENT_BINARY_DIR}/bin2s_include/${__BINARY_FILE}.h)
     endforeach()
 
     # Build the Assembly file.

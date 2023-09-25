@@ -4,11 +4,14 @@
 #include "imgui_hid_mappings.h"
 #include "lib.hpp"
 #include <cmath>
+#include "imgui_bin.h"
+#include "SFMonoSquare_Regular_otf.h"
 
 #include "nn/hid.h"
 
 #include "MemoryPoolMaker.h"
 #include "helpers/InputHelper.h"
+#include "util/sys/rw_pages.hpp"
 
 #define UBOSIZE 0x1000
 
@@ -237,14 +240,14 @@ bool createShaders()
 
     } else {
 
-        FsHelper::LoadData loadData = {
+        /*FsHelper::LoadData loadData = {
             .path = "sd:/Peepa/ImGuiData/imgui.bin"
         };
 
-        FsHelper::loadFileFromPath(loadData);
+        FsHelper::loadFileFromPath(loadData);*/
 
-        bd->imguiShaderBinary.size = loadData.bufSize;
-        bd->imguiShaderBinary.ptr = (u8*)loadData.buffer;
+        bd->imguiShaderBinary.size = imgui_bin_size;
+        bd->imguiShaderBinary.ptr = (u8*)imgui_bin;
     }
 
     if (bd->imguiShaderBinary.size > 0) {
@@ -418,13 +421,17 @@ void InitBackend(const NvnBackendInitInfo& initInfo)
 
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-    FsHelper::LoadData loadData = {
+    /*FsHelper::LoadData loadData = {
         .path = "sd:/Peepa/ImGuiData/Fonts/SFMonoSquare-Regular.otf"
     };
 
     FsHelper::loadFileFromPath(loadData);
+*/
 
-    io.Fonts->AddFontFromMemoryTTF(loadData.buffer, loadData.bufSize, 17, nullptr, io.Fonts->GetGlyphRangesJapanese());
+    static exl::util::RwPages fontPage(uintptr_t(SFMonoSquare_Regular_otf), SFMonoSquare_Regular_otf_size);
+    
+
+    io.Fonts->AddFontFromMemoryTTF(reinterpret_cast<void*>(fontPage.GetRw()), SFMonoSquare_Regular_otf_size, 17, nullptr, io.Fonts->GetGlyphRangesJapanese());
 
     ImGuiStyle& style = ImGui::GetStyle();
     ImVec4* colors = style.Colors;
