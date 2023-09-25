@@ -1,35 +1,34 @@
-#include "al/Library/LiveActor/LiveActor.h"
-#include "devenv/seadFontMgr.h"
 #include "diag/assert.hpp"
-#include "heap/seadHeapMgr.h"
 #include "hook/trampoline.hpp"
-#include "imgui.h"
 #include "lib.hpp"
 #include "nn/fs.h"
-#include "nn/oe.h"
-#include "nn/os.h"
-#include "nn/socket.h"
+#include "pe/Menu/Menu.h"
+#include "pe/Menu/UserConfig.h"
+#include "pe/Util/Offsets.h"
 #include "program/imgui_nvn.h"
-#include "replace.hpp"
-#include "util/modules.hpp"
-#include "util/sys/rw_pages.hpp"
-#include <sead/filedevice/nin/seadNinSDFileDeviceNin.h>
 #include <sead/filedevice/seadFileDeviceMgr.h>
-#include <sead/heap/seadExpHeap.h>
-#include <sead/heap/seadHeapMgr.h>
 
-HOOK_DEFINE_TRAMPOLINE(CreateFileDeviceMgr) { static void Callback(sead::FileDeviceMgr * thisPtr); };
-void CreateFileDeviceMgr::Callback(sead::FileDeviceMgr* thisPtr)
+HOOK_DEFINE_TRAMPOLINE(FileDeviceMgrCtor) { static void Callback(sead::FileDeviceMgr * thisPtr); };
+void FileDeviceMgrCtor::Callback(sead::FileDeviceMgr* thisPtr)
 {
     Orig(thisPtr);
     thisPtr->mMountedSd = nn::fs::MountSdCardForDebug("sd").IsSuccess();
-    // sead::NinSDFileDevice* sdFileDevice = new sead::NinSDFileDevice();
-    // thisPtr->mount(sdFileDevice);
+}
+
+class ProductSequence;
+HOOK_DEFINE_TRAMPOLINE(ProductSequenceInit) { static void Callback(ProductSequence * thisPtr); };
+void ProductSequenceInit::Callback(ProductSequence* thisPtr)
+{
+    Orig(thisPtr);
+
+    pe::Menu::createInstance(nullptr);
 }
 
 void drawDbgGui()
 {
-    ImGui::ShowDemoWindow();
+    auto* menu = pe::Menu::instance();
+    if (menu)
+        menu->draw();
 }
 
 extern "C" void exl_main(void* x0, void* x1)
@@ -39,7 +38,7 @@ extern "C" void exl_main(void* x0, void* x1)
     using Patcher = exl::patch::CodePatcher;
     using namespace exl::patch::inst;
 
-    CreateFileDeviceMgr::InstallAtOffset(0x00943d60);
+    FileDeviceMgrCtor::InstallAtOffset(pe::offsets::FileDeviceMgrCtorHookLocation);
 
     nvnImGui::InstallHooks();
     nvnImGui::addDrawFunc(drawDbgGui);

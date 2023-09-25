@@ -5,9 +5,9 @@
 namespace FsHelper {
 
 struct LoadData {
-    const char* path;
-    void* buffer;
-    long bufSize;
+    const char* path = nullptr;
+    void* buffer = nullptr;
+    long bufSize = 0;
 };
 
 nn::Result writeFileToPath(void* buf, size_t size, const char* path);

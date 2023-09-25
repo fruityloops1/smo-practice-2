@@ -6,6 +6,10 @@ if (NOT SWITCH)
   message(FATAL_ERROR "Not targeting switch, make sure to specify -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain.cmake")
 endif()
 
+if (NOT GAME_VERSION)
+  message(FATAL_ERROR "Please set GAME_VERSION")
+endif()
+
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -13,7 +17,14 @@ enable_language(ASM C CXX)
 
 ## Title Id
 set(CONFIG_TITLE_ID 0x0100000000010000)
-add_compile_definitions(EXL_PROGRAM_ID=${CONFIG_TITLE_ID} EXL_LOAD_KIND=Module EXL_LOAD_KIND_ENUM=2 NNSDK IMGUI_USER_CONFIG="imgui_backend/nvn_imgui_config.h" private=public protected=public)
+add_compile_definitions(EXL_PROGRAM_ID=${CONFIG_TITLE_ID}
+                        EXL_LOAD_KIND=Module
+                        EXL_LOAD_KIND_ENUM=2
+                        NNSDK IMGUI_USER_CONFIG="imgui_backend/nvn_imgui_config.h"
+                        private=public
+                        protected=public
+                        GAME_VERSION=${GAME_VERSION}
+                        )
 
 set(NN_SDK_MAJOR 4) # idk
 set(NN_SDK_MINOR 0) # idk
@@ -57,7 +68,6 @@ target_embed_binaries(subsdk9 "${PROJECT_SOURCE_DIR}/data/SFMonoSquare-Regular.o
 
 ## Prepare subsdk ld
 set(SUBSDK_LD_PATH ${CMAKE_CURRENT_SOURCE_DIR}/module/subsdk9.ld)
-set(GAME_VERSION 130)
 set(SYMS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/syms/${GAME_VERSION}")
 
 execute_process(

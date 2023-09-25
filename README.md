@@ -1,12 +1,16 @@
-# Peepa
+# smo-practice-2
 
-Base Project for custom code in Super Mario 3D World + Bowser's Fury 1.1
+Revamp of SMO practice mod
 
 # Credits
 
-- [exlaunch](https://github.com/shadowninja108/exlaunch/)
+- [LunaKit](https://github.com/amethyst-szs/smo-lunakit)
+- [Tischel/smo-practice](https://github.com/Tischel/smo-practice)
+- [MonsterDruide1/smo-practice](https://github.com/MonsterDruide1/smo-practice)
+- [Ontwikseltsaar/smo-practice](https://github.com/Ontwikseltsaar/smo-practice)
+- [shadowninja108/exlaunch](https://github.com/shadowninja108/exlaunch/)
 - [BDSP](https://github.com/Martmists-GH/BDSP)
 - [Sanae](https://github.com/Sanae6)
-- [EngineLessCC](https://github.com/EngineLessCC/exlaunch-cmake)
+- [EngineLessCC/exlaunch-cmake](https://github.com/EngineLessCC/exlaunch-cmake)
 - [Atmosphère](https://github.com/Atmosphere-NX/Atmosphere)
 - [oss-rtld](https://github.com/Thog/oss-rtld)

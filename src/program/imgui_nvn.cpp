@@ -179,21 +179,14 @@ void nvnImGui::addDrawFunc(ProcDrawFunc func)
     drawQueue.push_back(func);
 }
 
-bool nvnImGui::sDisableRender = true;
-static int sRenderEnableTimer = 120;
+bool nvnImGui::sDisableRender = false;
 
 void nvnImGui::procDraw()
 {
     ImguiNvnBackend::newFrame();
-    if (InputHelper::isButtonHold(nn::hid::NpadButton::ZR) && InputHelper::isButtonPress(nn::hid::NpadButton::Plus))
-        sDisableRender = !sDisableRender;
 
-    if (sRenderEnableTimer > 0) {
-        sRenderEnableTimer--;
-    }
-
-    if (sRenderEnableTimer > 0 || sDisableRender)
-        return;
+    if (sDisableRender)
+        return;    
     ImGui::NewFrame();
 
     for (auto drawFunc : drawQueue) {
