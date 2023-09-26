@@ -1,13 +1,14 @@
 #include "pe/Menu/UserConfig.h"
 #include "helpers/fsHelper.h"
+#include "pe/Menu/Menu.h"
 
 namespace pe {
 
 constexpr const char sUserConfigPath[] = "sd:/Peepa/UserConfig.bin";
 
-static UserConfig sConfig;
+static UserConfig* sConfig = nullptr;
 
-UserConfig& getConfig()
+UserConfig*& getConfig()
 {
     return sConfig;
 }
@@ -24,13 +25,13 @@ void loadConfig()
     FsHelper::loadFileFromPath(data);
     if (data.buffer != nullptr) {
         UserConfig* configData = reinterpret_cast<UserConfig*>(data.buffer);
-        sConfig = *configData;
+        *sConfig = *configData;
     }
 }
 
 void saveConfig()
 {
-    FsHelper::writeFileToPath(reinterpret_cast<void*>(&sConfig), sizeof(sConfig), sUserConfigPath);
+    FsHelper::writeFileToPath(reinterpret_cast<void*>(sConfig), sizeof(UserConfig), sUserConfigPath);
 }
 
 } // namespace pe

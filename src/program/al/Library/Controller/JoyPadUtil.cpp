@@ -21,9 +21,44 @@ bool isPadTrigger(s32 port, s32 button)
     return getController(port)->isTrig(button);
 }
 
-bool isPadTriggerLeftStick(s32 port)
+bool isPadTrigger1(s32 port)
 {
-    return isPadTrigger(port, 0xF00000);
+    return isPadTrigger(port, 1 << 7);
+}
+
+bool isPadTriggerPressLeftStick(s32 port)
+{
+    return isPadTrigger1(port);
+}
+
+bool isPadTriggerUp(s32 port)
+{
+    return isPadTrigger(port, 1 << 16);
+}
+
+bool isPadTriggerDown(s32 port)
+{
+    return isPadTrigger(port, 1 << 17);
+}
+
+bool isPadTriggerLeft(s32 port)
+{
+    return isPadTrigger(port, 1 << 18);
+}
+
+bool isPadTriggerRight(s32 port)
+{
+    return isPadTrigger(port, 1 << 19);
+}
+
+bool isPadHold(s32 port, s32 button)
+{
+    return getController(port)->isHold(button);
+}
+
+bool isPadHoldL(s32 port)
+{
+    return isPadHold(port, 1 << 13);
 }
 
 } // namespace al

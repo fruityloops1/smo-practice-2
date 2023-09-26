@@ -1,1 +1,3 @@
 _ZN4sead13ControllerMgr9sInstanceE = __main_start + 0x014ae758;
+_ZNK4sead13ControllerMgr18findControllerPortEPKNS_10ControllerE = __main_start + 0x00964c00;
+_ZNK4sead13ControllerMgr20getControllerByOrderENS_16ControllerDefine12ControllerIdEi = __main_start + 0x00964bc0;

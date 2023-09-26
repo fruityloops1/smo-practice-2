@@ -6,6 +6,7 @@
 #include "hook/trampoline.hpp"
 #include "lib.hpp"
 #include "nn/fs.h"
+#include "pe/Hacks/MenuDPadDisable.h"
 #include "pe/Menu/Menu.h"
 #include "pe/Menu/UserConfig.h"
 #include "pe/Util/Offsets.h"
@@ -31,6 +32,19 @@ void HakoniwaSequenceInit::Callback(HakoniwaSequence* thisPtr, const al::Sequenc
     pe::Menu::createInstance(nullptr);
 }
 
+HOOK_DEFINE_TRAMPOLINE(HakoniwaSequenceUpdate) { static void Callback(HakoniwaSequence * thisPtr); };
+void HakoniwaSequenceUpdate::Callback(HakoniwaSequence* thisPtr)
+{
+    Orig(thisPtr);
+
+    sead::ScopedCurrentHeapSetter setter(pe::getMenuHeap());
+    auto* menu = pe::Menu::instance();
+    if (menu) {
+        al::Scene* scene = *reinterpret_cast<al::Scene**>(reinterpret_cast<u8*>(thisPtr) + 0xb0);
+        menu->update(scene);
+    }
+}
+
 static void drawDbgGui()
 {
     sead::ScopedCurrentHeapSetter setter(pe::getMenuHeap());
@@ -47,7 +61,10 @@ extern "C" void exl_main(void* x0, void* x1)
     using namespace exl::patch::inst;
 
     FileDeviceMgrCtor::InstallAtOffset(pe::offsets::FileDeviceMgrCtorHookLocation);
-    HakoniwaSequenceInit::InstallAtOffset(pe::offsets::HakoniwaSequenceHookLocation);
+    HakoniwaSequenceInit::InstallAtOffset(pe::offsets::HakoniwaSequenceInitHookLocation);
+    HakoniwaSequenceUpdate::InstallAtOffset(pe::offsets::HakoniwaSequenceUpdate);
+
+    pe::initMenuDPadDisableHooks();
 
     nvnImGui::InstallHooks();
     nvnImGui::addDrawFunc(drawDbgGui);

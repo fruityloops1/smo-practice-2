@@ -8,7 +8,6 @@ enum class PeepaLanguage {
     German
 };
 
-PeepaLanguage& getLanguage();
 const char* getLocalizedString(const char* msg);
 
 } // namespace pe
