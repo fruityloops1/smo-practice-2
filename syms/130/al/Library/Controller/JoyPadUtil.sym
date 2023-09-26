@@ -1,2 +1,8 @@
 _ZN2al16isPadTriggerDownEi = __main_start + 0x005d0200;
 _ZN2al14isPadTriggerUpEi = __main_start + 0x005d0150;
+_ZN2al16isPadTriggerLeftEi = __main_start + 0x005d02b0;
+_ZN2al17isPadTriggerRightEi = __main_start + 0x005d0360;
+
+_ZN2al21getMainControllerPortEv = __main_start + 0x005cf910;
+_ZN2al19getReplayControllerEj = __main_start + 0x005d7600;
+_ZN2al23isValidReplayControllerEj = __main_start + 0x005d76f0;
