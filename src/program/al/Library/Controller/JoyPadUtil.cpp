@@ -61,4 +61,12 @@ bool isPadHoldL(s32 port)
     return isPadHold(port, 1 << 13);
 }
 
+bool isPadHold1(s32 port) {
+    return isPadHold(port, 1 << 7);
+}
+
+bool isPadHoldPressLeftStick(s32 port) {
+    return isPadHold1(port);
+}
+
 } // namespace al

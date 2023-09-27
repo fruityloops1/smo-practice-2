@@ -1,5 +1,7 @@
 #include "pe/Menu/Menu.h"
+#include "Player/PlayerActorHakoniwa.h"
 #include "al/Library/Controller/JoyPadUtil.h"
+#include "al/Library/LiveActor/ActorFlagFunction.h"
 #include "al/Library/LiveActor/ActorPoseKeeper.h"
 #include "al/Library/LiveActor/LiveActor.h"
 #include "al/Library/Nerve/NerveUtil.h"
@@ -13,10 +15,12 @@
 #include "pe/Menu/EnumMenuComponent.h"
 #include "pe/Menu/IntMenuComponent.h"
 #include "pe/Menu/MenuComponent.h"
+#include "pe/Menu/QuickActionMenu.h"
 #include "pe/Menu/UserConfig.h"
 #include "pe/Util/Localization.h"
 #include "pe/Util/Nerve.h"
 #include "pe/Util/Offsets.h"
+#include "pe/Util/Type.h"
 #include "rs/Util/PlayerUtil.h"
 #include "util/modules.hpp"
 #include <algorithm>
@@ -31,8 +35,6 @@ sead::Heap*& getMenuHeap()
 
 SEAD_SINGLETON_DISPOSER_IMPL(Menu)
 
-int value = 0;
-
 bool someBOol = false;
 
 Menu::Menu()
@@ -40,21 +42,17 @@ Menu::Menu()
     getConfig() = new UserConfig;
     pe::loadConfig();
 
-    // make these be localized id thingies instead
     mCategories[0].name = "Thing";
     mCategories[0].components.allocBuffer(2, nullptr);
     mCategories[0].components.pushBack(new BoolMenuComponent(&someBOol, "yeah"));
     // mCategories[0].components.pushBack(new EnumMenuComponent<int>(&value, ball, "Random int", false, 35));
+
     mCategories[1].name = "keybinds";
     mCategories[1].components.allocBuffer(4, nullptr);
-
-    static constexpr const char* actionNames[] {
-        "action0", "action1", "action2", "action3"
-    };
-    mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDUpBind), actionNames, "dpadup", true));
-    mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDDownBind), actionNames, "dpaddown", true));
-    mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDLeftBind), actionNames, "dpadleft", true));
-    mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDRightBind), actionNames, "dpadright", true));
+    mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDUpBind), sActionNames, "dpadup", true));
+    mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDDownBind), sActionNames, "dpaddown", true));
+    mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDLeftBind), sActionNames, "dpadleft", true));
+    mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDRightBind), sActionNames, "dpadright", true));
 
     mCategories[2].name = "settings";
     mCategories[2].components.allocBuffer(1, nullptr);
@@ -62,6 +60,9 @@ Menu::Menu()
         "English", "日本語", "Deutsch"
     };
     mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->currentLanguage), languageNames, "Language", false));
+
+    mComponents.allocBuffer(4, nullptr);
+    mComponents.pushBack(new QuickActionMenu(*this));
 }
 
 void Menu::update(al::Scene* scene)
@@ -72,11 +73,26 @@ void Menu::update(al::Scene* scene)
         pe::saveConfig();
     }
     mTimer++;
+
+    
+    for (int i = 0; i < mComponents.size(); i++)
+    {
+        IComponent* component = mComponents[i];
+        if (component)
+            component->update();
+    }
 }
 
 void Menu::draw()
 {
     updateInput();
+
+    for (int i = 0; i < mComponents.size(); i++)
+    {
+        IComponent* component = mComponents[i];
+        if (component)
+            component->draw();
+    }
 
     if (!mIsEnabled) {
         if (al::isPadTriggerUp(-1))
@@ -204,35 +220,53 @@ void Menu::updateInput()
 
 void Menu::callAction(ActionType type)
 {
-    switch (type) {
-    case ActionType::KillScene: {
-        if (mScene && mScene->mIsAlive) {
-            if (mScene->getNerveKeeper()->getCurrentNerve() == util::getNerveAt(offsets::StageSceneNrvPlay)) {
-                mScene->kill();
-            }
+    if (mScene && mScene->mIsAlive && mScene->getNerveKeeper()->getCurrentNerve() == util::getNerveAt(offsets::StageSceneNrvPlay)) {
+        PlayerActorBase* playerBase = reinterpret_cast<PlayerActorBase*>(rs::getPlayerActor(mScene));
+        switch (type) {
+        case ActionType::KillScene: {
+            mScene->kill();
+            return;
         }
-        break;
-    }
-    case ActionType::SavePosition: {
-        if (mScene && mScene->mIsAlive) {
-            al::LiveActor* mario = rs::getPlayerActor(mScene);
-            if (mario) {
-                mSavedPosition = al::getTrans(mario);
+        case ActionType::SavePosition: {
+            if (playerBase) {
+                if (PlayerActorHakoniwa* player = util::typeCast<PlayerActorHakoniwa>(playerBase)) {
+                    al::LiveActor* hack = player->getCurrentHack();
+                    al::LiveActor* move = hack != nullptr ? hack : player;
+
+                    mSavedPosition = al::getTrans(move);
+                    mSavedQuat = move->mPoseKeeper->getQuat();
+                }
             }
+
+            return;
         }
-        break;
-    }
-    case ActionType::LoadPosition: {
-        if (mScene && mScene->mIsAlive) {
-            al::LiveActor* mario = rs::getPlayerActor(mScene);
-            if (mario) {
-                // al::setTrans(mario, mSavedPosition);
+        case ActionType::LoadPosition: {
+            if (playerBase) {
+                if (PlayerActorHakoniwa* player = util::typeCast<PlayerActorHakoniwa>(playerBase)) {
+                    al::LiveActor* hack = player->getCurrentHack();
+                    al::LiveActor* move = hack != nullptr ? hack : player;
+
+                    if (hack == nullptr)
+                        player->startDemoPuppetable();
+
+                    al::offCollide(move);
+                    al::setTrans(move, mSavedPosition);
+                    al::updatePoseQuat(move, mSavedQuat);
+                    al::onCollide(move);
+                    if (hack == nullptr)
+                        player->endDemoPuppetable();
+                }
             }
+            return;
         }
-        break;
-    }
-    default:
-        break;
+        default:
+            break;
+        }
+    } else {
+        switch (type) {
+        default:
+            break;
+        }
     }
 }
 

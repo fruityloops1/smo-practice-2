@@ -1,9 +1,11 @@
 #pragma once
 
 #include "al/Project/Scene/SceneCreator.h"
+#include "container/seadPtrArray.h"
 #include "imgui.h"
 #include "math/seadQuat.h"
 #include "pe/Menu/Action.h"
+#include "pe/Menu/IComponent.h"
 #include <sead/container/seadPtrArray.h>
 #include <sead/heap/seadDisposer.h>
 #include <sead/heap/seadHeap.h>
@@ -22,6 +24,7 @@ struct MenuCategory {
 
 class Menu {
     bool mIsEnabled = true;
+    sead::PtrArray<IComponent> mComponents;
     MenuCategory mCategories[3];
     int mCurrentCategory = 0;
     bool mIsExpandedCurrentCategory = false;

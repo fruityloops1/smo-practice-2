@@ -11,6 +11,7 @@ struct UserConfig {
     ActionType mDDownBind = ActionType::None;
     ActionType mDLeftBind = ActionType::None;
     ActionType mDRightBind = ActionType::None;
+    ActionType mQuickMenuBinds[8] {ActionType::None};
 };
 
 UserConfig*& getConfig();

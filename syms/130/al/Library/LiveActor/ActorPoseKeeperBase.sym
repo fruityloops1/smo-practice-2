@@ -1,2 +1,3 @@
 _ZN2al8getTransEPKNS_9LiveActorE = __main_start + 0x0066d810;
 _ZN2al8setTransEPNS_9LiveActorERKN4sead7Vector3IfEE = __main_start + 0x0066d6d0;
+_ZN2al14updatePoseQuatEPNS_9LiveActorERKN4sead4QuatIfEE = __main_start + 0x0066d880;
