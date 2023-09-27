@@ -23,12 +23,14 @@ jobs:
             build/subsdk9.nss
             build/subsdk9.npdm
       - name: Make a release
-        if: github.ref == 'refs/heads/master'
-        uses: "marvinpinto/action-automatic-releases@latest"
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "Auto"
-          prerelease: true
-          title: "Auto Build"
-          files: |
-            *.zip
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            Automated Release
+          draft: false
+          prerelease: false
+          files: build.zip
