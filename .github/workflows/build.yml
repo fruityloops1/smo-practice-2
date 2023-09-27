@@ -17,8 +17,18 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: build
+          name: build.zip
           path: |
             build/subsdk9
             build/subsdk9.nss
             build/subsdk9.npdm
+      - name: Make a release
+        if: github.ref == 'refs/heads/master'
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "Auto"
+          prerelease: true
+          title: "Auto Build"
+          files: |
+            *.zip
