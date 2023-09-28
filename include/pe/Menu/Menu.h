@@ -1,5 +1,6 @@
 #pragma once
 
+#include "al/Library/LiveActor/LiveActor.h"
 #include "al/Project/Scene/SceneCreator.h"
 #include "container/seadPtrArray.h"
 #include "imgui.h"
@@ -35,6 +36,7 @@ class Menu {
 
     sead::Vector3f mSavedPosition;
     sead::Quatf mSavedQuat;
+    bool mIsSavedPos = false;
 
     int mTimer = 0;
 
@@ -42,7 +44,6 @@ class Menu {
     void updateInput();
     void drawExpandedCategory();
     MenuCategory& getCurrentCategory() { return mCategories[mCurrentCategory]; }
-    void callAction(ActionType type);
 
     void ball() { mCurrentComponentInCategory = 0; }
 
@@ -53,6 +54,10 @@ public:
     void update(al::Scene* scene);
     void draw();
     bool isEnabled() const { return mIsEnabled; }
+    void callAction(ActionType type);
+
+    __attribute__((noinline)) void savePosition(al::LiveActor* playerBase);
+    __attribute__((noinline)) void loadPosition(al::LiveActor* playerBase);
 
     static constexpr int sCategoryFontSize = 50;
     static constexpr int sCategorySpacing = 4;

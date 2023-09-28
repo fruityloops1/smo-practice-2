@@ -471,7 +471,7 @@ void InitBackend(const NvnBackendInitInfo& initInfo)
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
     io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
     io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
-    io.DisplaySize = ImVec2(1600, 900); // default size
+    io.DisplaySize = ImVec2(1920, 1080); // default size
 
     auto* bd = IM_NEW(NvnBackendData)();
     io.BackendRendererUserData = (void*)bd;
@@ -498,7 +498,7 @@ void InitBackend(const NvnBackendInitInfo& initInfo)
         "0123456789"
         "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽぁぃぅぇぉゃゅょっぉゕぁぃぅぇぉァアィイゥェォカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ"
         "ッーㇰㇱㇲㇳㇴㇵㇶㇷㇸㇹㇺㇻㇼㇽㇾㇿ"
-        "日本語設定"
+        "日本語設定位置"
         "上下右左"
         "！、"
         "äüö"

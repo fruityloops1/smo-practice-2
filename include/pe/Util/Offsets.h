@@ -17,6 +17,10 @@ namespace offsets {
 
     const uintptr_t StageSceneNrvPause = 0x012c5e48;
     const uintptr_t StageSceneNrvPlay = 0x012c5eb8;
+
+    const uintptr_t PlayerActorHakoniwaVft = 0x012b1ef8;
+
+    const uintptr_t ShineGrabHook = 0x001b4e00;
 #endif
 
 } // namespace offsets

@@ -10,6 +10,7 @@ class QuickActionMenu : public IComponent {
     int mActiveFrames = 0;
     float mLength = 0;
     int mSelectedActionIdx = -1;
+    bool mIsRetreating = false;
 
 public:
     QuickActionMenu(Menu& menu)

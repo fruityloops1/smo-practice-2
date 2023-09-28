@@ -2,7 +2,7 @@
 
 #include "Player/PlayerActorBase.h"
 
-class IUseDimension {};
+class IUseDimension { };
 
 class PlayerConst;
 class PlayerTrigger;
@@ -330,7 +330,11 @@ public:
     void exeDead();
     bool tryActionCapSpinAttackImpl(bool);
 
-    al::LiveActor* getCurrentHack() const { // i definitely dont regret using decomp as a submodule for headers
-        return *reinterpret_cast<al::LiveActor**>(reinterpret_cast<u8*>(getPlayerHackKeeper()) + 0x68);
+    al::LiveActor* getCurrentHack() const
+    { // i definitely dont regret using decomp as a submodule for headers
+        return *reinterpret_cast<al::LiveActor**>(reinterpret_cast<u8*>(mPlayerHackKeeper) + 0x68);
     }
+
+    void startDemoPuppetableSuperReal();
+    void endDemoPuppetableSuperReal();
 };

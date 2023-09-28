@@ -16,6 +16,7 @@
 #include "pe/Menu/IntMenuComponent.h"
 #include "pe/Menu/MenuComponent.h"
 #include "pe/Menu/QuickActionMenu.h"
+#include "pe/Menu/Timer.h"
 #include "pe/Menu/UserConfig.h"
 #include "pe/Util/Localization.h"
 #include "pe/Util/Nerve.h"
@@ -24,6 +25,7 @@
 #include "rs/Util/PlayerUtil.h"
 #include "util/modules.hpp"
 #include <algorithm>
+#include <cstdio>
 
 namespace pe {
 
@@ -42,17 +44,24 @@ Menu::Menu()
     getConfig() = new UserConfig;
     pe::loadConfig();
 
-    mCategories[0].name = "Thing";
+    mCategories[0].name = "timer";
     mCategories[0].components.allocBuffer(2, nullptr);
-    mCategories[0].components.pushBack(new BoolMenuComponent(&someBOol, "yeah"));
+    mCategories[0].components.pushBack(new IntMenuComponent<float>(&getConfig()->mTimerFontSize, "fontsize", 8, 100, true));
     // mCategories[0].components.pushBack(new EnumMenuComponent<int>(&value, ball, "Random int", false, 35));
 
     mCategories[1].name = "keybinds";
-    mCategories[1].components.allocBuffer(4, nullptr);
+    mCategories[1].components.allocBuffer(12, nullptr);
     mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDUpBind), sActionNames, "dpadup", true));
     mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDDownBind), sActionNames, "dpaddown", true));
     mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDLeftBind), sActionNames, "dpadleft", true));
     mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDRightBind), sActionNames, "dpadright", true));
+
+    static constexpr const char* wheelNames[] {
+        "wheel1", "wheel2", "wheel3", "wheel4", "wheel5", "wheel6", "wheel7", "wheel8"
+    };
+    for (int i = 0; i < 8; i++) {
+        mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mQuickMenuBinds[i]), sActionNames, wheelNames[i], true));
+    }
 
     mCategories[2].name = "settings";
     mCategories[2].components.allocBuffer(1, nullptr);
@@ -63,6 +72,7 @@ Menu::Menu()
 
     mComponents.allocBuffer(4, nullptr);
     mComponents.pushBack(new QuickActionMenu(*this));
+    mComponents.pushBack(new Timer);
 }
 
 void Menu::update(al::Scene* scene)
@@ -74,9 +84,7 @@ void Menu::update(al::Scene* scene)
     }
     mTimer++;
 
-    
-    for (int i = 0; i < mComponents.size(); i++)
-    {
+    for (int i = 0; i < mComponents.size(); i++) {
         IComponent* component = mComponents[i];
         if (component)
             component->update();
@@ -87,8 +95,10 @@ void Menu::draw()
 {
     updateInput();
 
-    for (int i = 0; i < mComponents.size(); i++)
-    {
+    if (ImGui::BeginMainMenuBar())
+        ImGui::EndMainMenuBar();
+
+    for (int i = 0; i < mComponents.size(); i++) {
         IComponent* component = mComponents[i];
         if (component)
             component->draw();
@@ -137,11 +147,16 @@ void Menu::draw()
 void Menu::drawExpandedCategory()
 {
     auto& cat = mCategories[mCurrentCategory];
+    if (mCurrentComponentInCategory >= cat.components.size())
+        mCurrentComponentInCategory = cat.components.size() - 1;
     int subX = 0, subY = 0;
     int y = getCategoryHeight(mCurrentCategory);
 
-    for (MenuComponent& component : cat.components) {
-        ImVec2 size = component.getSize();
+    for (int i = 0; i < cat.components.size(); i++) {
+        MenuComponent* component = cat.components[i];
+        if (component == nullptr)
+            continue;
+        ImVec2 size = component->getSize();
         subX = std::max((float)subX, size.x);
         subY += size.y;
     }
@@ -218,6 +233,41 @@ void Menu::updateInput()
         mCurrentCategory = 0;
 }
 
+void Menu::savePosition(al::LiveActor* playerBase)
+{
+    if (PlayerActorHakoniwa* player = util::typeCast<PlayerActorHakoniwa>((al::LiveActor*)playerBase)) {
+        al::LiveActor* hack = player->getCurrentHack();
+        al::LiveActor* move = hack != nullptr ? hack : player;
+
+        mSavedPosition = al::getTrans(move);
+        mSavedQuat = move->getPoseKeeper()->getQuat();
+        mIsSavedPos = true;
+    }
+}
+
+void Menu::loadPosition(al::LiveActor* playerBase)
+{
+    if (!mIsSavedPos)
+        return;
+    if (PlayerActorHakoniwa* player = util::typeCast<PlayerActorHakoniwa>((al::LiveActor*)playerBase)) {
+        al::LiveActor* hack = player->getCurrentHack();
+        al::LiveActor* move = hack != nullptr ? hack : player;
+
+        if (hack == nullptr)
+            player->startDemoPuppetableSuperReal();
+
+        al::offCollide(move);
+
+        al::setTrans(move, mSavedPosition);
+        al::updatePoseQuat(move, mSavedQuat);
+
+        if (hack == nullptr)
+            player->endDemoPuppetableSuperReal();
+
+        al::onCollide(move);
+    }
+}
+
 void Menu::callAction(ActionType type)
 {
     if (mScene && mScene->mIsAlive && mScene->getNerveKeeper()->getCurrentNerve() == util::getNerveAt(offsets::StageSceneNrvPlay)) {
@@ -228,35 +278,14 @@ void Menu::callAction(ActionType type)
             return;
         }
         case ActionType::SavePosition: {
-            if (playerBase) {
-                if (PlayerActorHakoniwa* player = util::typeCast<PlayerActorHakoniwa>(playerBase)) {
-                    al::LiveActor* hack = player->getCurrentHack();
-                    al::LiveActor* move = hack != nullptr ? hack : player;
-
-                    mSavedPosition = al::getTrans(move);
-                    mSavedQuat = move->mPoseKeeper->getQuat();
-                }
-            }
+            if (playerBase)
+                savePosition(playerBase);
 
             return;
         }
         case ActionType::LoadPosition: {
-            if (playerBase) {
-                if (PlayerActorHakoniwa* player = util::typeCast<PlayerActorHakoniwa>(playerBase)) {
-                    al::LiveActor* hack = player->getCurrentHack();
-                    al::LiveActor* move = hack != nullptr ? hack : player;
-
-                    if (hack == nullptr)
-                        player->startDemoPuppetable();
-
-                    al::offCollide(move);
-                    al::setTrans(move, mSavedPosition);
-                    al::updatePoseQuat(move, mSavedQuat);
-                    al::onCollide(move);
-                    if (hack == nullptr)
-                        player->endDemoPuppetable();
-                }
-            }
+            if (playerBase)
+                loadPosition(playerBase);
             return;
         }
         default:

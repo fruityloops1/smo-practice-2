@@ -2,6 +2,4 @@ _ZN2al21getMainControllerPortEv = __main_start + 0x005cf910;
 _ZN2al19getReplayControllerEj = __main_start + 0x005d7600;
 _ZN2al23isValidReplayControllerEj = __main_start + 0x005d76f0;
 
-/* BALLS !!! */
- _ZN2al12getLeftStickEi = __main_start + 0x0;
-_ZN2pe4util17checkTypeByVtableI19PlayerActorHakoniwa15PlayerActorBaseEEbPKT0_ = __main_start + 0x0;
+_ZN2al12getLeftStickEi = __main_start + 0x005d1770;

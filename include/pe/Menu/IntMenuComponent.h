@@ -7,6 +7,7 @@
 #include "pe/Util/Localization.h"
 #include <algorithm>
 #include <limits>
+#include <type_traits>
 
 namespace pe {
 
@@ -31,9 +32,9 @@ public:
 
 #define ENUM_MENU_COMPONENT_BUFFER                                            \
     const char* title = mLocalized ? pe::getLocalizedString(mTitle) : mTitle; \
-    size_t bufSize = snprintf(nullptr, 0, "%s: %d", title, *mValue);          \
+    size_t bufSize = snprintf(nullptr, 0, "%s: %d", title, int(*mValue));     \
     char buffer[bufSize + 1] { 0 };                                           \
-    snprintf(buffer, bufSize + 1, "%s: %d", title, *mValue);
+    snprintf(buffer, bufSize + 1, "%s: %d", title, int(*mValue));
 
     ImVec2 getSize() const override
     {

@@ -1,0 +1,2 @@
+_ZN19PlayerActorHakoniwa28startDemoPuppetableSuperRealEv = __main_start + 0x003c4840;
+_ZN19PlayerActorHakoniwa26endDemoPuppetableSuperRealEv = __main_start + 0x003c4aa0;
