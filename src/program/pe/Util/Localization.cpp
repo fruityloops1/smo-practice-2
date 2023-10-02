@@ -19,6 +19,12 @@ constexpr MsgEntry sLocalizationData[] {
             "はい",
             "Ja" } },
 
+    {
+        "hacks",
+        { "Hacks",
+            "ハックス",
+            "Hacks" },
+    },
     { "timer",
         { "Timer",
             "タイマー",
@@ -106,6 +112,15 @@ constexpr MsgEntry sLocalizationData[] {
         { "Load Position",
             "ロード位置",
             "Position Laden" } },
+    { "action4",
+        { "Respawn Chest Moons",
+            "リスポーンチェスト ムーンズ",
+            "Respawn Truhen-Monde" } },
+
+    { "shinerefresh",
+        { "Gray Moon Refresh",
+            "グレイ ムーン リフレッシュ",
+            "Graue Monde erneuern" } }
 };
 
 const char* getLocalizedString(const char* msg)

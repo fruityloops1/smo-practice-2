@@ -2,11 +2,8 @@
 #include "helpers/InputHelper.h"
 #include "imgui_backend/imgui_impl_nvn.hpp"
 #include "lib.hpp"
-#include "nn/hid.h"
 #include "nn/init.h"
-#include "nvn_Cpp.h"
 #include "nvn_CppFuncPtrImpl.h"
-#include "patch/code_patcher.hpp"
 
 nvn::Device* nvnDevice;
 nvn::Queue* nvnQueue;
@@ -18,9 +15,8 @@ nvn::CommandBufferInitializeFunc tempBufferInitFuncPtr;
 nvn::DeviceInitializeFunc tempDeviceInitFuncPtr;
 nvn::QueueInitializeFunc tempQueueInitFuncPtr;
 nvn::QueuePresentTextureFunc tempPresentTexFunc;
-nvn::CommandBufferSetMemoryCallbackFunc tempCmdBufSetMemoryCallbackFunc;
 
-nvn::CommandBufferSetViewportFunc tempSetViewportFunc;
+nvn::WindowSetCropFunc tempSetCropFunc;
 
 bool hasInitImGui = false;
 
@@ -30,15 +26,28 @@ ImVector<ProcDrawFunc> drawQueue;
 
 #define IMGUI_USEEXAMPLE_DRAW false
 
-static void setViewport(nvn::CommandBuffer* cmdBuf, int x, int y, int w, int h)
+void setCrop(nvn::Window* window, int x, int y, int w, int h)
 {
-    tempSetViewportFunc(cmdBuf, x, y, w, h);
+    tempSetCropFunc(window, x, y, w, h);
 
-    if (hasInitImGui)
-        ImGui::GetIO().DisplaySize = ImVec2(w - x, h - y);
+    if (hasInitImGui) {
+
+        ImVec2& dispSize = ImGui::GetIO().DisplaySize;
+        ImVec2 windowSize = ImVec2(w - x, h - y);
+
+        if (dispSize.x != windowSize.x && dispSize.y != windowSize.y) {
+
+            // might be a dumb way to detect if docked
+            bool isDockedMode = !(windowSize.x == 1280 && windowSize.y == 720);
+
+            dispSize = windowSize;
+            ImguiNvnBackend::updateProjection(windowSize);
+            ImguiNvnBackend::updateScale(isDockedMode);
+        }
+    }
 }
 
-static void presentTexture(nvn::Queue* queue, nvn::Window* window, int texIndex)
+void presentTexture(nvn::Queue* queue, nvn::Window* window, int texIndex)
 {
 
     if (hasInitImGui)
@@ -47,7 +56,7 @@ static void presentTexture(nvn::Queue* queue, nvn::Window* window, int texIndex)
     tempPresentTexFunc(queue, window, texIndex);
 }
 
-static NVNboolean deviceInit(nvn::Device* device, const nvn::DeviceBuilder* builder)
+NVNboolean deviceInit(nvn::Device* device, const nvn::DeviceBuilder* builder)
 {
     NVNboolean result = tempDeviceInitFuncPtr(device, builder);
     nvnDevice = device;
@@ -55,14 +64,14 @@ static NVNboolean deviceInit(nvn::Device* device, const nvn::DeviceBuilder* buil
     return result;
 }
 
-static NVNboolean queueInit(nvn::Queue* queue, const nvn::QueueBuilder* builder)
+NVNboolean queueInit(nvn::Queue* queue, const nvn::QueueBuilder* builder)
 {
     NVNboolean result = tempQueueInitFuncPtr(queue, builder);
     nvnQueue = queue;
     return result;
 }
 
-static NVNboolean cmdBufInit(nvn::CommandBuffer* buffer, nvn::Device* device)
+NVNboolean cmdBufInit(nvn::CommandBuffer* buffer, nvn::Device* device)
 {
     NVNboolean result = tempBufferInitFuncPtr(buffer, device);
     nvnCmdBuf = buffer;
@@ -85,13 +94,12 @@ nvn::GenericFuncPtrFunc getProc(nvn::Device* device, const char* procName)
     } else if (strcmp(procName, "nvnCommandBufferInitialize") == 0) {
         tempBufferInitFuncPtr = (nvn::CommandBufferInitializeFunc)ptr;
         return (nvn::GenericFuncPtrFunc)&cmdBufInit;
-    } else if (strcmp(procName, "nvnCommandBufferSetViewport") == 0) {
-        tempSetViewportFunc = (nvn::CommandBufferSetViewportFunc)ptr;
-        return (nvn::GenericFuncPtrFunc)&setViewport;
+    } else if (strcmp(procName, "nvnWindowSetCrop") == 0) {
+        tempSetCropFunc = (nvn::WindowSetCropFunc)ptr;
+        return (nvn::GenericFuncPtrFunc)&setCrop;
     } else if (strcmp(procName, "nvnQueuePresentTexture") == 0) {
         tempPresentTexFunc = (nvn::QueuePresentTextureFunc)ptr;
         return (nvn::GenericFuncPtrFunc)&presentTexture;
-        return ptr;
     }
 
     return ptr;
@@ -107,69 +115,69 @@ void disableButtons(nn::hid::NpadBaseState* state)
     }
 }
 
-HOOK_DEFINE_TRAMPOLINE(DisableFullKeyState) { static int Callback(int* unkInt, nn::hid::NpadFullKeyState* state, int count, const uint& port); };
+HOOK_DEFINE_TRAMPOLINE(DisableFullKeyState) {
+    static int Callback(int* unkInt, nn::hid::NpadFullKeyState* state, int count, uint const& port) {
+        int result = Orig(unkInt, state, count, port);
+disableButtons(state);
+return result;
+}
+}
+;
 
-int DisableFullKeyState::Callback(int* unkInt, nn::hid::NpadFullKeyState* state, int count, const uint& port)
-{
-    int result = Orig(unkInt, state, count, port);
-    disableButtons(state);
-    return result;
+HOOK_DEFINE_TRAMPOLINE(DisableHandheldState) {
+    static int Callback(int* unkInt, nn::hid::NpadHandheldState* state, int count, uint const& port) {
+        int result = Orig(unkInt, state, count, port);
+disableButtons(state);
+return result;
+}
+}
+;
+
+HOOK_DEFINE_TRAMPOLINE(DisableJoyDualState) {
+    static int Callback(int* unkInt, nn::hid::NpadJoyDualState* state, int count, uint const& port) {
+        int result = Orig(unkInt, state, count, port);
+disableButtons(state);
+return result;
+}
+}
+;
+
+HOOK_DEFINE_TRAMPOLINE(DisableJoyLeftState) {
+    static int Callback(int* unkInt, nn::hid::NpadJoyLeftState* state, int count, uint const& port) {
+        int result = Orig(unkInt, state, count, port);
+disableButtons(state);
+return result;
+}
+}
+;
+
+HOOK_DEFINE_TRAMPOLINE(DisableJoyRightState) {
+    static int Callback(int* unkInt, nn::hid::NpadJoyRightState* state, int count, uint const& port) {
+        int result = Orig(unkInt, state, count, port);
+disableButtons(state);
+return result;
+}
+}
+;
+
+HOOK_DEFINE_TRAMPOLINE(NvnBootstrapHook) {
+    static void * Callback(const char* funcName) {
+
+        void* result = Orig(funcName);
+
+if (strcmp(funcName, "nvnDeviceInitialize") == 0) {
+    tempDeviceInitFuncPtr = (nvn::DeviceInitializeFunc)result;
+    return (void*)&deviceInit;
+}
+if (strcmp(funcName, "nvnDeviceGetProcAddress") == 0) {
+    tempGetProcAddressFuncPtr = (nvn::DeviceGetProcAddressFunc)result;
+    return (void*)&getProc;
 }
 
-HOOK_DEFINE_TRAMPOLINE(DisableHandheldState) { static int Callback(int* unkInt, nn::hid::NpadHandheldState* state, int count, const uint& port); };
-
-int DisableHandheldState::Callback(int* unkInt, nn::hid::NpadHandheldState* state, int count, const uint& port)
-{
-    int result = Orig(unkInt, state, count, port);
-    disableButtons(state);
-    return result;
+return result;
 }
-
-HOOK_DEFINE_TRAMPOLINE(DisableJoyDualState) { static int Callback(int* unkInt, nn::hid::NpadJoyDualState* state, int count, const uint& port); };
-
-int DisableJoyDualState::Callback(int* unkInt, nn::hid::NpadJoyDualState* state, int count, const uint& port)
-{
-    int result = Orig(unkInt, state, count, port);
-    disableButtons(state);
-    return result;
 }
-
-HOOK_DEFINE_TRAMPOLINE(DisableJoyLeftState) { static int Callback(int* unkInt, nn::hid::NpadJoyLeftState* state, int count, const uint& port); };
-
-int DisableJoyLeftState::Callback(int* unkInt, nn::hid::NpadJoyLeftState* state, int count, const uint& port)
-{
-    int result = Orig(unkInt, state, count, port);
-    disableButtons(state);
-    return result;
-}
-
-HOOK_DEFINE_TRAMPOLINE(DisableJoyRightState) { static int Callback(int* unkInt, nn::hid::NpadJoyRightState* state, int count, const uint& port); };
-
-int DisableJoyRightState::Callback(int* unkInt, nn::hid::NpadJoyRightState* state, int count, const uint& port)
-{
-    int result = Orig(unkInt, state, count, port);
-    disableButtons(state);
-    return result;
-}
-
-HOOK_DEFINE_TRAMPOLINE(NvnBootstrapHook) { static nvn::GenericFuncPtrFunc Callback(const char* funcName); };
-
-nvn::GenericFuncPtrFunc NvnBootstrapHook::Callback(const char* funcName)
-{
-
-    nvn::GenericFuncPtrFunc result = Orig(funcName);
-
-    if (strcmp(funcName, "nvnDeviceInitialize") == 0) {
-        tempDeviceInitFuncPtr = (nvn::DeviceInitializeFunc)result;
-        return (nvn::GenericFuncPtrFunc)&deviceInit;
-    }
-    if (strcmp(funcName, "nvnDeviceGetProcAddress") == 0) {
-        tempGetProcAddressFuncPtr = (nvn::DeviceGetProcAddressFunc)result;
-        return (nvn::GenericFuncPtrFunc)&getProc;
-    }
-
-    return result;
-}
+;
 
 void nvnImGui::addDrawFunc(ProcDrawFunc func)
 {
@@ -179,14 +187,10 @@ void nvnImGui::addDrawFunc(ProcDrawFunc func)
     drawQueue.push_back(func);
 }
 
-bool nvnImGui::sDisableRender = false;
-
 void nvnImGui::procDraw()
 {
-    ImguiNvnBackend::newFrame();
 
-    if (sDisableRender)
-        return;
+    ImguiNvnBackend::newFrame();
     ImGui::NewFrame();
 
     for (auto drawFunc : drawQueue) {
@@ -257,6 +261,7 @@ bool nvnImGui::InitImGui()
         return true;
 
     } else {
+
         return false;
     }
 }

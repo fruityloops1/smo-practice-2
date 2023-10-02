@@ -7,6 +7,7 @@
 #include "lib.hpp"
 #include "nn/fs.h"
 #include "pe/Hacks/MenuDPadDisable.h"
+#include "pe/Hacks/PracticeHacks.h"
 #include "pe/Menu/Menu.h"
 #include "pe/Menu/UserConfig.h"
 #include "pe/Util/Offsets.h"
@@ -65,6 +66,7 @@ extern "C" void exl_main(void* x0, void* x1)
     HakoniwaSequenceUpdate::InstallAtOffset(pe::offsets::HakoniwaSequenceUpdate);
 
     pe::initMenuDPadDisableHooks();
+    pe::installPracticeHacks();
 
     nvnImGui::InstallHooks();
     nvnImGui::addDrawFunc(drawDbgGui);

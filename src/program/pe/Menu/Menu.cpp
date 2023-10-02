@@ -1,9 +1,14 @@
 #include "pe/Menu/Menu.h"
+#include "MapObj/Shine.h"
+#include "MapObj/TreasureBox.h"
 #include "Player/PlayerActorHakoniwa.h"
 #include "al/Library/Controller/JoyPadUtil.h"
+#include "al/Library/LiveActor/ActorCollisionFunction.h"
 #include "al/Library/LiveActor/ActorFlagFunction.h"
 #include "al/Library/LiveActor/ActorPoseKeeper.h"
 #include "al/Library/LiveActor/LiveActor.h"
+#include "al/Library/LiveActor/LiveActorGroup.h"
+#include "al/Library/LiveActor/LiveActorKit.h"
 #include "al/Library/Nerve/NerveUtil.h"
 #include "al/Library/Scene/Scene.h"
 #include "al/Library/Thread/FunctorV0M.h"
@@ -18,6 +23,7 @@
 #include "pe/Menu/QuickActionMenu.h"
 #include "pe/Menu/Timer.h"
 #include "pe/Menu/UserConfig.h"
+#include "pe/Menu/Vector2MenuComponent.h"
 #include "pe/Util/Localization.h"
 #include "pe/Util/Nerve.h"
 #include "pe/Util/Offsets.h"
@@ -44,31 +50,35 @@ Menu::Menu()
     getConfig() = new UserConfig;
     pe::loadConfig();
 
-    mCategories[0].name = "timer";
-    mCategories[0].components.allocBuffer(2, nullptr);
-    mCategories[0].components.pushBack(new IntMenuComponent<float>(&getConfig()->mTimerFontSize, "fontsize", 8, 100, true));
+    mCategories[0].name = "hacks";
+    mCategories[0].components.allocBuffer(1, nullptr);
+    mCategories[0].components.pushBack(new BoolMenuComponent(&getConfig()->mIsGrayShineRefreshEnabled, "shinerefresh"));
+    mCategories[1].name = "timer";
+    mCategories[1].components.allocBuffer(2, nullptr);
+    mCategories[1].components.pushBack(new IntMenuComponent<float>(&getConfig()->mTimerFontSize, "fontsize", 8, 100, true));
+    mCategories[1].components.pushBack(new Vector2MenuComponent(&getConfig()->mTimerPos, "position", true, ImVec2(0, 0), ImVec2(1600, 900)));
     // mCategories[0].components.pushBack(new EnumMenuComponent<int>(&value, ball, "Random int", false, 35));
 
-    mCategories[1].name = "keybinds";
-    mCategories[1].components.allocBuffer(12, nullptr);
-    mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDUpBind), sActionNames, "dpadup", true));
-    mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDDownBind), sActionNames, "dpaddown", true));
-    mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDLeftBind), sActionNames, "dpadleft", true));
-    mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDRightBind), sActionNames, "dpadright", true));
+    mCategories[2].name = "keybinds";
+    mCategories[2].components.allocBuffer(12, nullptr);
+    mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDUpBind), sActionNames, "dpadup", true));
+    mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDDownBind), sActionNames, "dpaddown", true));
+    mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDLeftBind), sActionNames, "dpadleft", true));
+    mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDRightBind), sActionNames, "dpadright", true));
 
     static constexpr const char* wheelNames[] {
         "wheel1", "wheel2", "wheel3", "wheel4", "wheel5", "wheel6", "wheel7", "wheel8"
     };
     for (int i = 0; i < 8; i++) {
-        mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mQuickMenuBinds[i]), sActionNames, wheelNames[i], true));
+        mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mQuickMenuBinds[i]), sActionNames, wheelNames[i], true));
     }
 
-    mCategories[2].name = "settings";
-    mCategories[2].components.allocBuffer(1, nullptr);
+    mCategories[3].name = "settings";
+    mCategories[3].components.allocBuffer(1, nullptr);
     static constexpr const char* languageNames[] {
         "English", "日本語", "Deutsch"
     };
-    mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->currentLanguage), languageNames, "Language", false));
+    mCategories[3].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->currentLanguage), languageNames, "Language", false));
 
     mComponents.allocBuffer(4, nullptr);
     mComponents.pushBack(new QuickActionMenu(*this));
@@ -95,8 +105,7 @@ void Menu::draw()
 {
     updateInput();
 
-    if (ImGui::BeginMainMenuBar())
-        ImGui::EndMainMenuBar();
+    ImGui::GetIO().FontGlobalScale = .5;
 
     for (int i = 0; i < mComponents.size(); i++) {
         IComponent* component = mComponents[i];
@@ -109,7 +118,7 @@ void Menu::draw()
             callAction(getConfig()->mDUpBind);
         if (al::isPadTriggerDown(-1))
             callAction(getConfig()->mDDownBind);
-        if (al::isPadTriggerLeft(-1))
+        if (al::isPadTriggerLeft(-1) && !al::isPadHoldL(-1))
             callAction(getConfig()->mDLeftBind);
         if (al::isPadTriggerRight(-1))
             callAction(getConfig()->mDRightBind);
@@ -270,7 +279,7 @@ void Menu::loadPosition(al::LiveActor* playerBase)
 
 void Menu::callAction(ActionType type)
 {
-    if (mScene && mScene->mIsAlive && mScene->getNerveKeeper()->getCurrentNerve() == util::getNerveAt(offsets::StageSceneNrvPlay)) {
+    if (mScene && mScene->mIsAlive && (mScene->getNerveKeeper()->getCurrentNerve() == util::getNerveAt(offsets::StageSceneNrvPlay) || mScene->getNerveKeeper()->getCurrentNerve() == util::getNerveAt(offsets::StageSceneNrvShineGet))) {
         PlayerActorBase* playerBase = reinterpret_cast<PlayerActorBase*>(rs::getPlayerActor(mScene));
         switch (type) {
         case ActionType::KillScene: {
@@ -291,11 +300,11 @@ void Menu::callAction(ActionType type)
         default:
             break;
         }
-    } else {
-        switch (type) {
-        default:
-            break;
-        }
+    }
+
+    switch (type) {
+    default:
+        break;
     }
 }
 

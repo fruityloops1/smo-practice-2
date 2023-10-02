@@ -2,6 +2,7 @@
 #include "helpers/fsHelper.h"
 #include "imgui.h"
 #include "imgui_hid_mappings.h"
+#include "imgui_internal.h"
 #include "lib.hpp"
 #include <cmath>
 
@@ -13,7 +14,7 @@
 
 #define UBOSIZE 0x1000
 
-typedef float Matrix44f[4][4];
+namespace ImguiNvnBackend {
 
 void make_identity(Matrix44f& mtx)
 {
@@ -26,25 +27,36 @@ void make_identity(Matrix44f& mtx)
     memcpy(mtx, &ident, sizeof(Matrix44f));
 }
 
-auto orthoRH_ZO(float left, float right, float bottom, float top, float zNear, float zFar)
+void orthoRH_ZO(Matrix44f& mtx, float left, float right, float bottom, float top, float zNear, float zFar)
 {
-    struct {
-        Matrix44f value;
-    } mtx;
-    make_identity(mtx.value);
-    mtx.value[0][0] = 2.f / (right - left);
-    mtx.value[1][1] = 2.f / (top - bottom);
-    mtx.value[2][2] = -1.f / (zFar - zNear);
-    mtx.value[3][0] = -(right + left) / (right - left);
-    mtx.value[3][1] = -(top + bottom) / (top - bottom);
-    mtx.value[3][2] = -zNear / (zFar - zNear);
-    return mtx;
+    make_identity(mtx);
+    mtx[0][0] = 2.f / (right - left);
+    mtx[1][1] = 2.f / (top - bottom);
+    mtx[2][2] = -1.f / (zFar - zNear);
+    mtx[3][0] = -(right + left) / (right - left);
+    mtx[3][1] = -(top + bottom) / (top - bottom);
+    mtx[3][2] = -zNear / (zFar - zNear);
 }
 
-// orthographic matrix used for shader
-static const auto projMatrix = orthoRH_ZO(0.0f, 1920, 1080, 0.0f, -1.0f, 1.0f);
+// WIP ImGui Functions from docking branch
+static void ScaleWindow(ImGuiWindow* window, float scale)
+{
+    ImVec2 origin = window->Viewport->Pos;
+    window->Pos = ImFloor(
+        ImVec2((window->Pos.x - origin.x) * scale + origin.x, (window->Pos.y - origin.y) * scale + origin.y));
+    window->Size = ImFloor(ImVec2(window->Size.x * scale, window->Size.y * scale));
+    window->SizeFull = ImFloor(ImVec2(window->SizeFull.x * scale, window->SizeFull.y * scale));
+    window->ContentSize = ImFloor(ImVec2(window->ContentSize.x * scale, window->ContentSize.y * scale));
+}
 
-namespace ImguiNvnBackend {
+void ScaleWindowsInViewport(ImGuiViewport* viewport, float scale)
+{
+    ImGuiContext& g = *GImGui;
+
+    for (int i = 0; i != g.Windows.Size; i++)
+        if (g.Windows[i]->Viewport == viewport)
+            ScaleWindow(g.Windows[i], scale);
+}
 
 // doesnt get used anymore really, as back when it was needed i had a simplified shader to test with, but now I just test with the actual imgui shader
 void initTestShader()
@@ -201,7 +213,7 @@ void renderTestShader(ImDrawData* drawData)
     bd->cmdBuf->BindProgram(&bd->shaderProgram, nvn::ShaderStageBits::VERTEX | nvn::ShaderStageBits::FRAGMENT);
 
     bd->cmdBuf->BindUniformBuffer(nvn::ShaderStage::VERTEX, 0, *bd->uniformMemory, UBOSIZE);
-    bd->cmdBuf->UpdateUniformBuffer(*bd->uniformMemory, UBOSIZE, 0, sizeof(projMatrix), &projMatrix);
+    bd->cmdBuf->UpdateUniformBuffer(*bd->uniformMemory, UBOSIZE, 0, sizeof(bd->mProjMatrix), &bd->mProjMatrix);
 
     bd->cmdBuf->BindVertexBuffer(0, (*bd->vtxBuffer), bd->vtxBuffer->GetPoolSize());
 
@@ -501,7 +513,7 @@ void InitBackend(const NvnBackendInitInfo& initInfo)
         "日本語設定位置"
         "上下右左"
         "！、"
-        "äüö"
+        "äüöß"
         "!\"§$%&/()=?´`^°#+-·.,;:_'*\\}][{");
     builder.BuildRanges(&ranges);
 
@@ -647,6 +659,42 @@ void updateInput()
     }
 }
 
+void updateProjection(ImVec2 dispSize)
+{
+    orthoRH_ZO(getBackendData()->mProjMatrix, 0.0f, dispSize.x, dispSize.y, 0.0f, -1.0f, 1.0f);
+}
+
+void updateScale(bool isDocked)
+{
+    static float prevScale = 0.0f;
+
+    float scale = isDocked ? 1.5f : 1.f;
+
+    ImGuiStyle& stylePtr = ImGui::GetStyle();
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGuiIO& io = ImGui::GetIO();
+
+    ImVec4 prevColors[ImGuiCol_COUNT] = {};
+    memcpy(&prevColors, &stylePtr.Colors, sizeof(stylePtr.Colors));
+
+    // reset style
+    stylePtr = ImGuiStyle();
+    // set colors back to previous
+    memcpy(&stylePtr.Colors, &prevColors, sizeof(stylePtr.Colors));
+    // scale style
+    ImGui::GetStyle().ScaleAllSizes(scale);
+    // reset scale of windows
+    if (prevScale != 0.0f) {
+        ScaleWindowsInViewport(viewport, 1.f / prevScale);
+    }
+
+    // scale window
+    ScaleWindowsInViewport(viewport, scale);
+    prevScale = scale;
+    // set font scale
+    io.FontGlobalScale = scale;
+}
+
 void newFrame()
 {
     ImGuiIO& io = ImGui::GetIO();
@@ -759,8 +807,8 @@ void renderDrawData(ImDrawData* drawData)
 
     bd->cmdBuf->BindUniformBuffer(nvn::ShaderStage::VERTEX, 0, *bd->uniformMemory,
         UBOSIZE); // bind uniform block ptr
-    bd->cmdBuf->UpdateUniformBuffer(*bd->uniformMemory, UBOSIZE, 0, sizeof(projMatrix),
-        &projMatrix); // add projection matrix data to uniform data
+    bd->cmdBuf->UpdateUniformBuffer(*bd->uniformMemory, UBOSIZE, 0, sizeof(bd->mProjMatrix),
+        &bd->mProjMatrix); // add projection matrix data to uniform data
 
     setRenderStates(); // sets up the rest of the render state, required so that our shader properly gets drawn to the screen
 
@@ -787,7 +835,7 @@ void renderDrawData(ImDrawData* drawData)
 
             // im not exactly sure this scaling is a good solution,
             // for some reason imgui clipping coords are relative to 720p instead of whatever I set for disp size.
-            ImVec2 origRes(1920.0f, 1080.0f);
+            ImVec2 origRes(1280.0f, 720.0f);
             ImVec2 newRes = io.DisplaySize; // (1600.0f, 900.0f);
 
             ImVec4 clipRect = ImVec4((cmd.ClipRect.x / origRes.x) * newRes.x,

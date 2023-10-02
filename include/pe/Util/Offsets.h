@@ -17,8 +17,15 @@ namespace offsets {
 
     const uintptr_t StageSceneNrvPause = 0x012c5e48;
     const uintptr_t StageSceneNrvPlay = 0x012c5eb8;
+    const uintptr_t StageSceneNrvShineGet = 0x012c5dc0;
 
     const uintptr_t PlayerActorHakoniwaVft = 0x012b1ef8;
+    const uintptr_t ShineVft = 0x01202f00;
+    const uintptr_t TreasureBoxVft = 0x0127c4d0;
+    const uintptr_t TreasureBoxNrvWait = 0x0127ca58;
+    const uintptr_t GameDataFileIsGotShine = 0x004c9700;
+
+    const uintptr_t ShineNrvAppear = 0x01204060;
 
     const uintptr_t ShineGrabHook = 0x001b4e00;
 #endif

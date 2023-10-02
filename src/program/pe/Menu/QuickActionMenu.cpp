@@ -45,12 +45,12 @@ void QuickActionMenu::draw()
         else
             mActiveFrames++;
 
-        float progress = float(mActiveFrames <= 25 ? mActiveFrames : 25) / 25;
+        float progress = float(mActiveFrames <= 15 ? mActiveFrames : 15) / 15;
 
-        if (mActiveFrames <= 25)
+        if (mActiveFrames <= 15)
             mLength = easeOutQuad(progress) * 300;
 
-        const ImVec2 center(1920.f / 2, 1080.f / 2);
+        const ImVec2 center(1600.f / 2, 900.f / 2);
         const sead::Vector2f& stick = al::getLeftStick(-1);
         const ImVec2 cursorPos(center.x + stick.x * 300, center.y + -stick.y * 300);
 
@@ -92,8 +92,8 @@ void QuickActionMenu::draw()
             mSelectedActionIdx = -1;
     } else {
         if (!mIsRetreating && mActiveFrames > 0) {
-            if (mActiveFrames > 25)
-                mActiveFrames = 25;
+            if (mActiveFrames > 15)
+                mActiveFrames = 15;
             mIsRetreating = true;
             if (mSelectedActionIdx != -1)
                 mMenu.callAction(getConfig()->mQuickMenuBinds[mSelectedActionIdx]);

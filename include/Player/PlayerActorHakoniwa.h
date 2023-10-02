@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Player/PlayerActorBase.h"
-
-class IUseDimension { };
+#include "al/Library/LiveActor/ActorDimensionKeeper.h"
 
 class PlayerConst;
 class PlayerTrigger;
@@ -121,7 +120,7 @@ class PlayerInfo;
 class ActorDimensionKeeper;
 class PlayerAnimator;
 
-class PlayerActorHakoniwa : public PlayerActorBase, public IUseDimension {
+class PlayerActorHakoniwa : public PlayerActorBase {
 public:
     PlayerInfo* mPlayerInfo;
     PlayerConst* mPlayerConst;
