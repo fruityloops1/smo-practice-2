@@ -4,7 +4,7 @@
 
 namespace pe {
 
-constexpr const char sUserConfigPath[] = "sd:/Peepa/UserConfig.bin";
+constexpr const char sUserConfigPath[] = "sd:/PeepaUserConfig.bin";
 
 static UserConfig* sConfig = nullptr;
 

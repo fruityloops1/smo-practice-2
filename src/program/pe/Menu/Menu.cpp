@@ -85,7 +85,8 @@ Menu::Menu()
     mCategories[0].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mCurPattern), patternNames, "mofumofupattern", false, true));
 
     mCategories[1].name = "timer";
-    mCategories[1].components.allocBuffer(4, nullptr);
+    mCategories[1].components.allocBuffer(5, nullptr);
+    mCategories[1].components.pushBack(new BoolMenuComponent(&getConfig()->mTimerEnabled, "timer"));
     mCategories[1].components.pushBack(new IntMenuComponent<float>(&getConfig()->mTimerFontSize, "fontsize", 8, 100, true));
     mCategories[1].components.pushBack(new Vector2MenuComponent(&getConfig()->mTimerPos, "position", true, ImVec2(0, 0), ImVec2(1600, 900)));
     static constexpr const char* timerNames[] {

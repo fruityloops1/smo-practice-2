@@ -251,7 +251,7 @@ bool createShaders()
     } else {
 
         FsHelper::LoadData loadData = {
-            .path = "sd:/Peepa/ImGuiData/imgui.bin"
+            .path = "content:/ImGuiData/imgui.bin"
         };
 
         FsHelper::loadFileFromPath(loadData);
@@ -496,7 +496,7 @@ void InitBackend(const NvnBackendInitInfo& initInfo)
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     FsHelper::LoadData loadData = {
-        .path = "sd:/Peepa/ImGuiData/Fonts/SFMonoSquare-Regular.otf"
+        .path = "content:/ImGuiData/Fonts/SFMonoSquare-Regular.otf"
     };
 
     FsHelper::loadFileFromPath(loadData);

@@ -41,11 +41,11 @@ struct UserConfig {
     ActionType mDRightBind = ActionType::None;
     ActionType mQuickMenuBinds[8] { ActionType::None };
     ImVec2 mTimerPos = ImVec2(1600.f / 2, 900.f / 2);
-    bool mTimerEnabled = true;
+    bool mTimerEnabled = false;
     bool mTimerIsRTA = true;
     float mTimerFontSize = 50;
-    TimerHookType mTimerStartType = TimerHookType::ShineGrab;
-    TimerHookType mTimerEndType = TimerHookType::ShineGrab;
+    TimerHookType mTimerStartType = TimerHookType::None;
+    TimerHookType mTimerEndType = TimerHookType::None;
     bool mInputDisplayEnabled = true;
     ImVec2 mInputDisplayPos = ImVec2(1600.f / 2, 900.f / 2);
 
