@@ -1,6 +1,7 @@
 #pragma once
 
 #include "al/Library/LiveActor/LiveActor.h"
+#include "al/Library/Thread/FunctorV0M.h"
 #include "al/Project/Scene/SceneCreator.h"
 #include "container/seadPtrArray.h"
 #include "imgui.h"
@@ -45,8 +46,6 @@ class Menu {
     void drawExpandedCategory();
     MenuCategory& getCurrentCategory() { return mCategories[mCurrentCategory]; }
 
-    void ball() { mCurrentComponentInCategory = 0; }
-
     SEAD_SINGLETON_DISPOSER(Menu)
 public:
     Menu();
@@ -55,6 +54,24 @@ public:
     void draw();
     bool isEnabled() const { return mIsEnabled; }
     void callAction(ActionType type);
+
+    class CallActionFunctor : public al::FunctorBase {
+    private:
+        Menu* mPtr = nullptr;
+        ActionType mType = ActionType::None;
+
+    public:
+        CallActionFunctor(Menu* ptr, ActionType type)
+            : mPtr(ptr)
+            , mType(type)
+        {
+        }
+
+        void operator()() const override { mPtr->callAction(mType); };
+        FunctorBase* clone() const override { return new CallActionFunctor(*this); };
+
+        ~CallActionFunctor() override = default;
+    };
 
     __attribute__((noinline)) void savePosition(al::LiveActor* playerBase);
     __attribute__((noinline)) void loadPosition(al::LiveActor* playerBase);

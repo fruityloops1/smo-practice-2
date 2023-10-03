@@ -48,7 +48,7 @@ public:
     void draw(const ImVec2& at) override
     {
         if (mIsFocused) {
-            if (al::isPadTriggerLeft(-1))
+            if (al::isPadTriggerLeft(-1) && !al::isPadHoldL(-1))
                 (*mValue)--;
             else if (al::isPadTriggerRight(-1))
                 (*mValue)++;

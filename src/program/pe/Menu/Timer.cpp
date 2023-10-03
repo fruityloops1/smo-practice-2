@@ -1,6 +1,7 @@
 #include "pe/Menu/Timer.h"
 #include "al/Library/LiveActor/ActorClippingFunction.h"
 #include "al/Library/LiveActor/LiveActor.h"
+#include "al/Library/Nerve/NerveUtil.h"
 #include "nn/os.h"
 #include "patch/code_patcher.hpp"
 #include "pe/Menu/UserConfig.h"
@@ -9,12 +10,21 @@
 
 namespace pe {
 
-static Timer* sInstance = nullptr;
+Timer* Timer::sInstance = nullptr;
 
 static void shineGrabHook(al::LiveActor* shine)
 {
     al::invalidateClipping(shine);
-    sInstance->event(TimerHookType::ShineGrab);
+    Timer::sInstance->event(TimerHookType::ShineGrab);
+}
+
+static bool shineTickHook(al::LiveActor* actor)
+{
+    bool isFirstStep = al::isFirstStep(actor);
+    if (actor->getNerveKeeper()->getCurrentStep() == 1) {
+        Timer::sInstance->event(TimerHookType::ShineTick);
+    }
+    return isFirstStep;
 }
 
 Timer::Timer()
@@ -23,6 +33,7 @@ Timer::Timer()
 
     using Patcher = exl::patch::CodePatcher;
     Patcher(offsets::ShineGrabHook).BranchLinkInst((void*)shineGrabHook);
+    Patcher(offsets::ShineTickHook).BranchLinkInst((void*)shineTickHook);
 }
 
 void Timer::start()
@@ -33,7 +44,17 @@ void Timer::start()
 
 void Timer::stop()
 {
-    mEndTick = nn::os::GetSystemTick();
+    if (mIsRunning) {
+        mEndTick = nn::os::GetSystemTick();
+        mIsRunning = false;
+    }
+}
+
+void Timer::reset()
+{
+    auto now = nn::os::GetSystemTick();
+    mStartTick = now;
+    mEndTick = now;
     mIsRunning = false;
 }
 

@@ -20,6 +20,7 @@
 #include "pe/Menu/EnumMenuComponent.h"
 #include "pe/Menu/IntMenuComponent.h"
 #include "pe/Menu/MenuComponent.h"
+#include "pe/Menu/MofumofuPatternUpdateNotification.h"
 #include "pe/Menu/QuickActionMenu.h"
 #include "pe/Menu/Timer.h"
 #include "pe/Menu/UserConfig.h"
@@ -51,13 +52,47 @@ Menu::Menu()
     pe::loadConfig();
 
     mCategories[0].name = "hacks";
-    mCategories[0].components.allocBuffer(1, nullptr);
-    mCategories[0].components.pushBack(new BoolMenuComponent(&getConfig()->mIsGrayShineRefreshEnabled, "shinerefresh"));
+    mCategories[0].components.allocBuffer(4, nullptr);
+    mCategories[0].components.pushBack(new BoolMenuComponent(&getConfig()->mIsGrayShineRefreshEnabled, "grayshinerefresh"));
+    mCategories[0].components.pushBack(new BoolMenuComponent(&getConfig()->mIsShineRefreshEnabled, "shinerefresh"));
+    mCategories[0].components.pushBack(new BoolMenuComponent(&getConfig()->mIsBgmDisabled, "bgmdisable"));
+
+    static constexpr const char* patternNames[] {
+        "Random",
+        "Ghost",
+        "Nose",
+        "C",
+        "W",
+        "J",
+        "Medal",
+        "Plane",
+        "Five",
+        "Hangman",
+        "Spanish",
+        "Siblings",
+        "Snake",
+        "Eight",
+        "Mushroom",
+        "Z",
+        "Tetris",
+        "Ear",
+        "Bomb",
+        "Bird",
+        "L",
+        "O"
+    };
+
+    mCategories[0].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mCurPattern), patternNames, "mofumofupattern", false, true));
+
     mCategories[1].name = "timer";
-    mCategories[1].components.allocBuffer(2, nullptr);
+    mCategories[1].components.allocBuffer(4, nullptr);
     mCategories[1].components.pushBack(new IntMenuComponent<float>(&getConfig()->mTimerFontSize, "fontsize", 8, 100, true));
     mCategories[1].components.pushBack(new Vector2MenuComponent(&getConfig()->mTimerPos, "position", true, ImVec2(0, 0), ImVec2(1600, 900)));
-    // mCategories[0].components.pushBack(new EnumMenuComponent<int>(&value, ball, "Random int", false, 35));
+    static constexpr const char* timerNames[] {
+        "timer0", "timer1", "timer2"
+    };
+    mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mTimerStartType), timerNames, "timerstart", true));
+    mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mTimerEndType), timerNames, "timerend", true));
 
     mCategories[2].name = "keybinds";
     mCategories[2].components.allocBuffer(12, nullptr);
@@ -78,11 +113,12 @@ Menu::Menu()
     static constexpr const char* languageNames[] {
         "English", "日本語", "Deutsch"
     };
-    mCategories[3].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->currentLanguage), languageNames, "Language", false));
+    mCategories[3].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->currentLanguage), languageNames, "Language", false, false));
 
     mComponents.allocBuffer(4, nullptr);
     mComponents.pushBack(new QuickActionMenu(*this));
     mComponents.pushBack(new Timer);
+    mComponents.pushBack(new MofumofuPatternUpdateNotification);
 }
 
 void Menu::update(al::Scene* scene)
@@ -303,8 +339,33 @@ void Menu::callAction(ActionType type)
     }
 
     switch (type) {
+    case ActionType::StartTimer:
+        Timer::sInstance->start();
+        return;
+    case ActionType::StopTimer:
+        Timer::sInstance->stop();
+        return;
+    case ActionType::ResetTimer:
+        Timer::sInstance->reset();
+        return;
     default:
         break;
+    }
+
+    if (type == ActionType::PrevMofumofuPattern or type == ActionType::NextMofumofuPattern) {
+        int& pattern = *reinterpret_cast<int*>(&getConfig()->mCurPattern);
+
+        if (type == ActionType::PrevMofumofuPattern)
+            pattern--;
+        else
+            pattern++;
+
+        if (pattern > 22)
+            pattern = 22;
+        if (pattern < 0)
+            pattern = 0;
+        MofumofuPatternUpdateNotification::sInstance->setUpdated();
+        return;
     }
 }
 

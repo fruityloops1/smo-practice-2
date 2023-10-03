@@ -16,28 +16,30 @@ class EnumMenuComponent : public MenuComponent {
     int mNumEnumValues = 0;
     const char* mTitle = nullptr;
     bool mLocalized = false;
+    bool mTitleLocalized = false;
     int mFontSize = 35;
 
 public:
     template <int N>
-    EnumMenuComponent(T* value, const char* const (&values)[N], const char* title, bool localized = false, int fontSize = 35)
+    EnumMenuComponent(T* value, const char* const (&values)[N], const char* title, bool localized = false, bool titleLocalized = true, int fontSize = 35)
         : mValue(value)
         , mEnumValues(values)
         , mNumEnumValues(N)
         , mTitle(title)
         , mLocalized(localized)
+        , mTitleLocalized(titleLocalized)
         , mFontSize(fontSize)
     {
     }
 
-#define ENUM_MENU_COMPONENT_BUFFER                                            \
-    const char* curEnumValue = mEnumValues[int(*mValue)];                     \
-    if (mLocalized)                                                           \
-        curEnumValue = pe::getLocalizedString(curEnumValue);                  \
-    const char* title = mLocalized ? pe::getLocalizedString(mTitle) : mTitle; \
-    char buffer[strlen(title) + 2 + strlen(curEnumValue) + 1] { 0 };          \
-    strcpy(buffer, title);                                                    \
-    strcat(buffer, ": ");                                                     \
+#define ENUM_MENU_COMPONENT_BUFFER                                                 \
+    const char* curEnumValue = mEnumValues[int(*mValue)];                          \
+    if (mLocalized)                                                                \
+        curEnumValue = pe::getLocalizedString(curEnumValue);                       \
+    const char* title = mTitleLocalized ? pe::getLocalizedString(mTitle) : mTitle; \
+    char buffer[strlen(title) + 2 + strlen(curEnumValue) + 1] { 0 };               \
+    strcpy(buffer, title);                                                         \
+    strcat(buffer, ": ");                                                          \
     strcat(buffer, curEnumValue)
 
     ImVec2 getSize() const override
@@ -52,7 +54,7 @@ public:
     void draw(const ImVec2& at) override
     {
         if (mIsFocused) {
-            if (al::isPadTriggerLeft(-1))
+            if (al::isPadTriggerLeft(-1) && !al::isPadHoldL(-1))
                 (*mValue)--;
             else if (al::isPadTriggerRight(-1))
                 (*mValue)++;

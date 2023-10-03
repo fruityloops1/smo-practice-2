@@ -1,2 +1,3 @@
 _ZN2pe14badAppleFramesE = 0;
 _impure_ptr = 0; /* i dont FUCKING know */
+_ZSt25__throw_bad_function_callv = 0; /* DIE !!! */

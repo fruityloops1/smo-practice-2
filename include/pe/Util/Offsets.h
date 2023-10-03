@@ -24,10 +24,15 @@ namespace offsets {
     const uintptr_t TreasureBoxVft = 0x0127c4d0;
     const uintptr_t TreasureBoxNrvWait = 0x0127ca58;
     const uintptr_t GameDataFileIsGotShine = 0x004c9700;
+    const uintptr_t GameDataFunctionSetGotShine = 0x004d3c10;
+    const uintptr_t StartBgm1 = 0x0059ac30;
+    const uintptr_t StartBgm2 = 0x0059acd0;
+    const uintptr_t ShineRefreshText = 0x00e6dedd;
 
     const uintptr_t ShineNrvAppear = 0x01204060;
 
     const uintptr_t ShineGrabHook = 0x001b4e00;
+    const uintptr_t ShineTickHook = 0x001dfd94;
 #endif
 
 } // namespace offsets

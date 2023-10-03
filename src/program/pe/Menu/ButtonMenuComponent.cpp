@@ -15,7 +15,7 @@ ImVec2 ButtonMenuComponent::getSize() const
 void ButtonMenuComponent::draw(const ImVec2& at)
 {
     if (al::isPadTriggerPressLeftStick(-1)) {
-        (*mFunctor)();
+        mFunctor();
     }
     ImGui::GetForegroundDrawList()->AddText(ImGui::GetIO().Fonts->Fonts[0], mFontSize, ImVec2(at.x + Menu::sCategorySpacing, at.y + Menu::sCategorySpacing), IM_COL32(255, 255, 255, 255), mLocalized ? pe::getLocalizedString(mText) : mText);
 }

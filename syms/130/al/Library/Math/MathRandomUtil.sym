@@ -1,0 +1,2 @@
+_ZN2al9getRandomEi = __main_start + 0x00692f20;
+_ZN2al17isHalfProbabilityEv = __main_start + 0x00693bb0;

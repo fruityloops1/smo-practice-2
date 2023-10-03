@@ -7,10 +7,11 @@
 namespace pe {
 
 enum class TimerHookType {
+    None,
+    ShineGrab,
+    ShineTick,
     GameStart,
     EscapeWire,
-    ShineGrab,
-    ShineTick
 };
 
 class Timer : public IComponent {
@@ -24,9 +25,12 @@ public:
 
     void start();
     void stop();
+    void reset();
     void event(TimerHookType type);
 
     void draw() override;
+
+    static Timer* sInstance;
 };
 
 } // namespace pe
