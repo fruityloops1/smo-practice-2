@@ -52,7 +52,11 @@ struct UserConfig {
     bool mIsBgmDisabled = false;
     bool mIsShineRefreshEnabled = false;
     bool mIsGrayShineRefreshEnabled = false;
+    bool mIsEnableAutosave = true;
+    bool mIsEnableWarpsAlways = false;
     MofumofuPattern mCurPattern = Random;
+    int mSelectedStageIdx = 0;
+    int mSelectedScenario = 0;
 
     struct MofumofuPatternEntry {
         const char* typeStr;

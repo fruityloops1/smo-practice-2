@@ -2,6 +2,10 @@
 #include "MapObj/Shine.h"
 #include "MapObj/TreasureBox.h"
 #include "Player/PlayerActorHakoniwa.h"
+#include "Scene/ChangeStageInfo.h"
+#include "Scene/SceneObjUtil.h"
+#include "System/GameDataFunction.h"
+#include "System/GameDataHolder.h"
 #include "al/Library/Controller/JoyPadUtil.h"
 #include "al/Library/LiveActor/ActorCollisionFunction.h"
 #include "al/Library/LiveActor/ActorFlagFunction.h"
@@ -16,6 +20,7 @@
 #include "pe/Menu/Action.h"
 #include "pe/Menu/BoolMenuComponent.h"
 #include "pe/Menu/ButtonMenuComponent.h"
+#include "pe/Menu/ChangeStage.h"
 #include "pe/Menu/DummyMenuComponent.h"
 #include "pe/Menu/EnumMenuComponent.h"
 #include "pe/Menu/IntMenuComponent.h"
@@ -52,10 +57,12 @@ Menu::Menu()
     pe::loadConfig();
 
     mCategories[0].name = "hacks";
-    mCategories[0].components.allocBuffer(4, nullptr);
+    mCategories[0].components.allocBuffer(6, nullptr);
     mCategories[0].components.pushBack(new BoolMenuComponent(&getConfig()->mIsGrayShineRefreshEnabled, "grayshinerefresh"));
     mCategories[0].components.pushBack(new BoolMenuComponent(&getConfig()->mIsShineRefreshEnabled, "shinerefresh"));
     mCategories[0].components.pushBack(new BoolMenuComponent(&getConfig()->mIsBgmDisabled, "bgmdisable"));
+    mCategories[0].components.pushBack(new BoolMenuComponent(&getConfig()->mIsEnableWarpsAlways, "alwaysenablewarps"));
+    mCategories[0].components.pushBack(new BoolMenuComponent(&getConfig()->mIsEnableAutosave, "disableautosave"));
 
     static constexpr const char* patternNames[] {
         "Random",
@@ -109,12 +116,30 @@ Menu::Menu()
         mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mQuickMenuBinds[i]), sActionNames, wheelNames[i], true));
     }
 
-    mCategories[3].name = "settings";
-    mCategories[3].components.allocBuffer(1, nullptr);
+    mCategories[3].name = "stage";
+    mCategories[3].components.allocBuffer(3, nullptr);
+    mCategories[3].components.pushBack(new EnumMenuComponent<int>(&getConfig()->mSelectedStageIdx, sStageNames, "Stage", false, false));
+    mCategories[3].components.pushBack(new IntMenuComponent<int>(&getConfig()->mSelectedScenario, "scenario", -1, 14, true));
+    mCategories[3].components.pushBack(new ButtonMenuComponent(
+        "go", [this]() {
+            if (mScene && mScene->mIsAlive) {
+                GameDataHolder* holder = (GameDataHolder*)al::getSceneObj(mScene, 20);
+                if (holder)
+
+                {
+                    ChangeStageInfo info = ChangeStageInfo(holder, "start", sStageNames[getConfig()->mSelectedStageIdx], false, getConfig()->mSelectedScenario, { 0 });
+                    holder->changeNextStage(&info, 0);
+                }
+            }
+        },
+        true));
+
+    mCategories[4].name = "settings";
+    mCategories[4].components.allocBuffer(1, nullptr);
     static constexpr const char* languageNames[] {
         "English", "日本語", "Deutsch"
     };
-    mCategories[3].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->currentLanguage), languageNames, "Language", false, false));
+    mCategories[4].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->currentLanguage), languageNames, "Language", false, false));
 
     mComponents.allocBuffer(4, nullptr);
     mComponents.pushBack(new QuickActionMenu(*this));
@@ -265,7 +290,7 @@ void Menu::updateInput()
         if (mCurrentComponentInCategory >= getCurrentCategory().components.size())
             mCurrentComponentInCategory = getCurrentCategory().components.size() - 1;
 
-        if (getCurrentCategory().components[mCurrentComponentInCategory]->canHaveFocus()) {
+        if (getCurrentCategory().components[mCurrentComponentInCategory]->canHaveFocus() && mIsEnabled) {
             if (al::isPadTriggerPressLeftStick(-1))
                 mIsFocusedOnCurrentComponent = !mIsFocusedOnCurrentComponent;
             getCurrentCategory().components[mCurrentComponentInCategory]->setIsFocused(mIsFocusedOnCurrentComponent);
@@ -334,6 +359,9 @@ void Menu::callAction(ActionType type)
                 loadPosition(playerBase);
             return;
         }
+        case ActionType::LifeMaxUp:
+            GameDataFunction::getLifeMaxUpItem(static_cast<PlayerActorHakoniwa*>(playerBase));
+            return;
         default:
             break;
         }

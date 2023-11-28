@@ -56,7 +56,7 @@ public:
             if (int(*mValue) < mLowerLimit)
                 *mValue = mLowerLimit;
             if (int(*mValue) > mUpperLimit)
-                *mValue = mUpperLimit - 1;
+                *mValue = mUpperLimit;
         }
 
         ENUM_MENU_COMPONENT_BUFFER;

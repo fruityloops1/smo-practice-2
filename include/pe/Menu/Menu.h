@@ -27,7 +27,7 @@ struct MenuCategory {
 class Menu {
     bool mIsEnabled = true;
     sead::PtrArray<IComponent> mComponents;
-    MenuCategory mCategories[4];
+    MenuCategory mCategories[5];
     int mCurrentCategory = 0;
     bool mIsExpandedCurrentCategory = false;
     int mCurrentComponentInCategory = 0;

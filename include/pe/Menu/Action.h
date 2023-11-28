@@ -12,10 +12,11 @@ enum class ActionType {
     ResetTimer,
     NextMofumofuPattern,
     PrevMofumofuPattern,
+    LifeMaxUp
 };
 
 constexpr const char* sActionNames[] {
-    "action0", "action1", "action2", "action3", "action4", "action5", "action6", "action7", "action8"
+    "action0", "action1", "action2", "action3", "action4", "action5", "action6", "action7", "action8", "action9"
 };
 
 } // namespace pe

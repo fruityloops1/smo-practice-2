@@ -23,7 +23,7 @@ void loadConfig()
     FsHelper::LoadData data;
     data.path = sUserConfigPath;
     FsHelper::loadFileFromPath(data);
-    if (data.buffer != nullptr) {
+    if (data.buffer != nullptr && data.bufSize == sizeof(UserConfig)) {
         UserConfig* configData = reinterpret_cast<UserConfig*>(data.buffer);
         *sConfig = *configData;
     }

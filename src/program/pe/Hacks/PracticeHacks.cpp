@@ -1,4 +1,6 @@
 #include "pe/Hacks/PracticeHacks.h"
+#include "Layout/MapLayout.h"
+#include "Scene/StageScene.h"
 #include "System/GameDataHolderWriter.h"
 #include "al/Library/Audio/AudioKeeper.h"
 #include "al/Library/Math/MathRandomUtil.h"
@@ -56,6 +58,16 @@ static int getMofumofuTarget(int a)
     return r;
 }
 
+static bool isEnableCheckpointWarp(MapLayout* thisPtr)
+{
+    return getConfig()->mIsEnableWarpsAlways ? true : thisPtr->isEnableCheckpointWarp();
+}
+
+static bool isEnableSave(StageScene* scene)
+{
+    return getConfig()->mIsEnableAutosave ? scene->isEnableSave() : false;
+}
+
 void installPracticeHacks()
 {
     using Patcher = exl::patch::CodePatcher;
@@ -67,6 +79,10 @@ void installPracticeHacks()
 
     Patcher(0x000b07f8).BranchLinkInst((void*)getMofumofuTarget);
     Patcher(0x000b07a8).BranchLinkInst((void*)isPatternReverse);
+    Patcher(0x001d1584).BranchLinkInst((void*)isEnableCheckpointWarp);
+    Patcher(0x004742d0).BranchLinkInst((void*)isEnableSave);
+    Patcher(0x004b1c78).BranchLinkInst((void*)isEnableSave);
+    Patcher(0x004b4fa4).BranchLinkInst((void*)isEnableSave);
 
     exl::util::RwPages a(exl::util::modules::GetTargetOffset(offsets::ShineRefreshText), 24);
     strncpy((char*)a.GetRw(), "Practice Mod", 24);
