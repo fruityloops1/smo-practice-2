@@ -31,6 +31,11 @@ bool isPadTriggerPressLeftStick(s32 port)
     return isPadTrigger1(port);
 }
 
+bool isPadTriggerA(s32 port)
+{
+    return isPadTrigger(port, 1);
+}
+
 bool isPadTriggerUp(s32 port)
 {
     return isPadTrigger(port, 1 << 16);
@@ -61,11 +66,13 @@ bool isPadHoldL(s32 port)
     return isPadHold(port, 1 << 13);
 }
 
-bool isPadHold1(s32 port) {
+bool isPadHold1(s32 port)
+{
     return isPadHold(port, 1 << 7);
 }
 
-bool isPadHoldPressLeftStick(s32 port) {
+bool isPadHoldPressLeftStick(s32 port)
+{
     return isPadHold1(port);
 }
 

@@ -61,11 +61,13 @@ void Timer::reset()
 void Timer::event(TimerHookType type)
 {
     bool isStartEvent = getConfig()->mTimerStartType == type;
-    if (!mIsRunning && isStartEvent)
+    bool canSplit = true;
+    if (!mIsRunning && isStartEvent) {
         start();
-    else if (mIsRunning && getConfig()->mTimerEndType == type)
+        canSplit = false;
+    } else if (mIsRunning && getConfig()->mTimerEndType == type)
         stop();
-    if ((!mIsRunning && isStartEvent) && getConfig()->mTimerSplit)
+    if (canSplit && getConfig()->mTimerSplit)
         showSplit();
 }
 

@@ -3,9 +3,11 @@
 #include "Scene/StageScene.h"
 #include "System/GameDataHolderWriter.h"
 #include "al/Library/Audio/AudioKeeper.h"
+#include "al/Library/Controller/JoyPadUtil.h"
 #include "al/Library/Math/MathRandomUtil.h"
 #include "hook/trampoline.hpp"
 #include "patch/code_patcher.hpp"
+#include "pe/Menu/Menu.h"
 #include "pe/Menu/UserConfig.h"
 #include "pe/Util/Offsets.h"
 #include "replace.hpp"
@@ -68,6 +70,15 @@ static bool isEnableSave(StageScene* scene)
     return getConfig()->mIsEnableAutosave ? scene->isEnableSave() : false;
 }
 
+HOOK_DEFINE_TRAMPOLINE(IsPadTriggerA) { static bool Callback(s32 port); };
+
+bool IsPadTriggerA::Callback(s32 port)
+{
+    if (pe::Menu::instance()->isEnabled())
+        return false;
+    return Orig(port);
+}
+
 void installPracticeHacks()
 {
     using Patcher = exl::patch::CodePatcher;
@@ -83,6 +94,7 @@ void installPracticeHacks()
     Patcher(0x004742d0).BranchLinkInst((void*)isEnableSave);
     Patcher(0x004b1c78).BranchLinkInst((void*)isEnableSave);
     Patcher(0x004b4fa4).BranchLinkInst((void*)isEnableSave);
+    IsPadTriggerA::InstallAtOffset(0x005cfbd0);
 
     exl::util::RwPages a(exl::util::modules::GetTargetOffset(offsets::ShineRefreshText), 24);
     strncpy((char*)a.GetRw(), "Practice Mod", 24);

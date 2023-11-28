@@ -292,7 +292,7 @@ void Menu::updateInput()
             mCurrentComponentInCategory = getCurrentCategory().components.size() - 1;
 
         if (getCurrentCategory().components[mCurrentComponentInCategory]->canHaveFocus() && mIsEnabled) {
-            if (al::isPadTriggerPressLeftStick(-1))
+            if (al::isPadTriggerA(-1))
                 mIsFocusedOnCurrentComponent = !mIsFocusedOnCurrentComponent;
             getCurrentCategory().components[mCurrentComponentInCategory]->setIsFocused(mIsFocusedOnCurrentComponent);
         } else
