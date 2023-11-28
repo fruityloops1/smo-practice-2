@@ -65,7 +65,7 @@ void Timer::event(TimerHookType type)
         start();
     else if (mIsRunning && getConfig()->mTimerEndType == type)
         stop();
-    if (!isStartEvent && getConfig()->mTimerSplit)
+    if ((!mIsRunning && isStartEvent) && getConfig()->mTimerSplit)
         showSplit();
 }
 
