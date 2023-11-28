@@ -57,7 +57,7 @@ Menu::Menu()
     pe::loadConfig();
 
     mCategories[0].name = "hacks";
-    mCategories[0].components.allocBuffer(6, nullptr);
+    mCategories[0].components.allocBuffer(5, nullptr);
     mCategories[0].components.pushBack(new BoolMenuComponent(&getConfig()->mIsGrayShineRefreshEnabled, "grayshinerefresh"));
     mCategories[0].components.pushBack(new BoolMenuComponent(&getConfig()->mIsShineRefreshEnabled, "shinerefresh"));
     mCategories[0].components.pushBack(new BoolMenuComponent(&getConfig()->mIsBgmDisabled, "bgmdisable"));
