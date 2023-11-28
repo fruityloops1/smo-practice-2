@@ -19,6 +19,8 @@ class Timer : public IComponent {
     s64 mStartTick = 0;
     s64 mEndTick = 0;
     bool mIsRunning = false;
+    s64 mShowSplitTick = 0;
+    int mFrames = 0;
 
 public:
     Timer();
@@ -27,6 +29,7 @@ public:
     void stop();
     void reset();
     void event(TimerHookType type);
+    void showSplit();
 
     void draw() override;
 

@@ -60,10 +60,18 @@ void Timer::reset()
 
 void Timer::event(TimerHookType type)
 {
-    if (!mIsRunning && getConfig()->mTimerStartType == type)
+    bool isStartEvent = getConfig()->mTimerStartType == type;
+    if (!mIsRunning && isStartEvent)
         start();
     else if (mIsRunning && getConfig()->mTimerEndType == type)
         stop();
+    if (!isStartEvent && getConfig()->mTimerSplit)
+        showSplit();
+}
+
+void Timer::showSplit()
+{
+    mShowSplitTick = nn::os::GetSystemTick();
 }
 
 void Timer::draw()
@@ -71,9 +79,17 @@ void Timer::draw()
     if (!getConfig()->mTimerEnabled)
         return;
 
+    mFrames++;
+
     if (getConfig()->mTimerIsRTA) {
         char buffer[32] { 0 };
-        s64 time = (mIsRunning ? nn::os::GetSystemTick().m_tick : mEndTick) - mStartTick;
+
+        s64 timerNow = mIsRunning ? nn::os::GetSystemTick().m_tick : mEndTick;
+        bool isShowSplit = mShowSplitTick && float(nn::os::GetSystemTick().m_tick - mShowSplitTick) / nn::os::GetSystemTickFrequency() <= 2;
+        if (isShowSplit)
+            timerNow = mShowSplitTick;
+
+        s64 time = timerNow - mStartTick;
         s64 seconds = time / nn::os::GetSystemTickFrequency();
         s64 minutes = seconds / 60;
         s64 remainingSeconds = seconds % 60;
@@ -83,7 +99,10 @@ void Timer::draw()
         else
             snprintf(buffer, 32, "%02ld.%03ld", remainingSeconds, milliseconds);
 
-        ImGui::GetForegroundDrawList()->AddText(ImGui::GetIO().Fonts->Fonts[0], getConfig()->mTimerFontSize, getConfig()->mTimerPos, IM_COL32(255, 255, 255, 255), buffer);
+        if (isShowSplit)
+            ImGui::GetForegroundDrawList()->AddText(ImGui::GetIO().Fonts->Fonts[0], getConfig()->mTimerFontSize, getConfig()->mTimerPos, IM_COL32(255, 0, 0, mFrames % 20 <= 10 ? 255 : 0), buffer);
+        else
+            ImGui::GetForegroundDrawList()->AddText(ImGui::GetIO().Fonts->Fonts[0], getConfig()->mTimerFontSize, getConfig()->mTimerPos, IM_COL32(255, 255, 255, 255), buffer);
     }
 }
 

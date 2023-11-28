@@ -92,7 +92,7 @@ Menu::Menu()
     mCategories[0].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mCurPattern), patternNames, "mofumofupattern", false, true));
 
     mCategories[1].name = "timer";
-    mCategories[1].components.allocBuffer(5, nullptr);
+    mCategories[1].components.allocBuffer(6, nullptr);
     mCategories[1].components.pushBack(new BoolMenuComponent(&getConfig()->mTimerEnabled, "timer"));
     mCategories[1].components.pushBack(new IntMenuComponent<float>(&getConfig()->mTimerFontSize, "fontsize", 8, 100, true));
     mCategories[1].components.pushBack(new Vector2MenuComponent(&getConfig()->mTimerPos, "position", true, ImVec2(0, 0), ImVec2(1600, 900)));
@@ -101,6 +101,7 @@ Menu::Menu()
     };
     mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mTimerStartType), timerNames, "timerstart", true));
     mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mTimerEndType), timerNames, "timerend", true));
+    mCategories[1].components.pushBack(new BoolMenuComponent(&getConfig()->mTimerSplit, "timersplit"));
 
     mCategories[2].name = "keybinds";
     mCategories[2].components.allocBuffer(12, nullptr);
@@ -390,9 +391,9 @@ void Menu::callAction(ActionType type)
             pattern++;
 
         if (pattern > 22)
-            pattern = 22;
-        if (pattern < 0)
             pattern = 0;
+        if (pattern < 0)
+            pattern = 22;
         MofumofuPatternUpdateNotification::sInstance->setUpdated();
         return;
     }

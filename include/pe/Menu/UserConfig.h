@@ -43,6 +43,7 @@ struct UserConfig {
     ImVec2 mTimerPos = ImVec2(1600.f / 2, 900.f / 2);
     bool mTimerEnabled = false;
     bool mTimerIsRTA = true;
+    bool mTimerSplit = true;
     float mTimerFontSize = 50;
     TimerHookType mTimerStartType = TimerHookType::None;
     TimerHookType mTimerEndType = TimerHookType::None;
