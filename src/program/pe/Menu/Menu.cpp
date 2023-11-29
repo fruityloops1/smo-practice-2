@@ -342,29 +342,36 @@ void Menu::loadPosition(al::LiveActor* playerBase)
 
 void Menu::callAction(ActionType type)
 {
-    if (mScene && mScene->mIsAlive && (mScene->getNerveKeeper()->getCurrentNerve() == util::getNerveAt(offsets::StageSceneNrvPlay) || mScene->getNerveKeeper()->getCurrentNerve() == util::getNerveAt(offsets::StageSceneNrvShineGet))) {
-        PlayerActorBase* playerBase = reinterpret_cast<PlayerActorBase*>(rs::getPlayerActor(mScene));
-        switch (type) {
-        case ActionType::KillScene: {
-            mScene->kill();
-            return;
-        }
-        case ActionType::SavePosition: {
-            if (playerBase)
-                savePosition(playerBase);
 
-            return;
-        }
-        case ActionType::LoadPosition: {
-            if (playerBase)
-                loadPosition(playerBase);
-            return;
-        }
-        case ActionType::LifeMaxUp:
-            GameDataFunction::getLifeMaxUpItem(static_cast<PlayerActorHakoniwa*>(playerBase));
-            return;
-        default:
-            break;
+    if (mScene && mScene->mIsAlive) {
+        const al::Nerve* nrv = mScene->getNerveKeeper()->getCurrentNerve();
+        bool allowedNerve = (nrv == util::getNerveAt(offsets::StageSceneNrvPlay) || nrv == util::getNerveAt(offsets::StageSceneNrvShineGet));
+        uintptr_t typeInfo = *reinterpret_cast<uintptr_t*>(pe::util::getVft(nrv) - 8);
+        const char** typeName = reinterpret_cast<const char**>(typeInfo + 8);
+        if (strstr(*typeName, "StageSceneNrvDemo") or allowedNerve) {
+            PlayerActorBase* playerBase = reinterpret_cast<PlayerActorBase*>(rs::getPlayerActor(mScene));
+            switch (type) {
+            case ActionType::KillScene: {
+                mScene->kill();
+                return;
+            }
+            case ActionType::SavePosition: {
+                if (playerBase)
+                    savePosition(playerBase);
+
+                return;
+            }
+            case ActionType::LoadPosition: {
+                if (playerBase)
+                    loadPosition(playerBase);
+                return;
+            }
+            case ActionType::LifeMaxUp:
+                GameDataFunction::getLifeMaxUpItem(static_cast<PlayerActorHakoniwa*>(playerBase));
+                return;
+            default:
+                break;
+            }
         }
     }
 
