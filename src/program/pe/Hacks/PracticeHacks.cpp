@@ -88,8 +88,8 @@ void installPracticeHacks()
     StartBgm1::InstallAtOffset(offsets::StartBgm1);
     StartBgm2::InstallAtOffset(offsets::StartBgm2);
 
-    Patcher(0x000b07f8).BranchLinkInst((void*)getMofumofuTarget);
-    Patcher(0x000b07a8).BranchLinkInst((void*)isPatternReverse);
+    Patcher(0x000a46ec).BranchLinkInst((void*)getMofumofuTarget);
+    Patcher(0x000a4698).BranchLinkInst((void*)isPatternReverse);
     Patcher(0x001d1584).BranchLinkInst((void*)isEnableCheckpointWarp);
     Patcher(0x004742d0).BranchLinkInst((void*)isEnableSave);
     Patcher(0x004b1c78).BranchLinkInst((void*)isEnableSave);
