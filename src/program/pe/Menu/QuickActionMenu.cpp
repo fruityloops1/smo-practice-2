@@ -31,6 +31,15 @@ static float calcDistance(const ImVec2& vec1, const ImVec2& vec2)
     return sqrtf(d1 * d1 + d2 * d2);
 }
 
+bool QuickActionMenu::isPressStickTime()
+{
+    if (al::isPadHoldPressLeftStick(-1))
+        mStickPressTimer++;
+    else
+        mStickPressTimer = 0;
+    return mStickPressTimer >= 20;
+}
+
 void QuickActionMenu::draw()
 {
     if (mMenu.isEnabled())

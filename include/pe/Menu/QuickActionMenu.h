@@ -12,6 +12,10 @@ class QuickActionMenu : public IComponent {
     int mSelectedActionIdx = -1;
     bool mIsRetreating = false;
 
+    int mStickPressTimer = 0;
+
+    bool isPressStickTime();
+
 public:
     QuickActionMenu(Menu& menu)
         : mMenu(menu)
