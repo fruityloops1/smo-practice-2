@@ -47,7 +47,7 @@ void QuickActionMenu::draw()
 
     if (mIsRetreating && mActiveFrames <= 0)
         mIsRetreating = false;
-    if (al::isPadHoldPressLeftStick(-1) || mIsRetreating) {
+    if (isPressStickTime() || mIsRetreating) {
     draw:
         if (mIsRetreating)
             mActiveFrames--;
