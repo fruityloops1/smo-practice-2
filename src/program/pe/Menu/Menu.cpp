@@ -104,11 +104,14 @@ Menu::Menu()
     mCategories[1].components.pushBack(new BoolMenuComponent(&getConfig()->mTimerSplit, "timersplit"));
 
     mCategories[2].name = "keybinds";
-    mCategories[2].components.allocBuffer(12, nullptr);
+    mCategories[2].components.allocBuffer(15, nullptr);
     mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDUpBind), sActionNames, "dpadup", true));
     mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDDownBind), sActionNames, "dpaddown", true));
     mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDLeftBind), sActionNames, "dpadleft", true));
     mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDRightBind), sActionNames, "dpadright", true));
+    mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mRsLBind), sActionNames, "rsl", true));
+    mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mRsRBind), sActionNames, "rsr", true));
+    mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mZLZRBind), sActionNames, "zlzr", true));
 
     static constexpr const char* wheelNames[] {
         "wheel1", "wheel2", "wheel3", "wheel4", "wheel5", "wheel6", "wheel7", "wheel8"
@@ -120,7 +123,7 @@ Menu::Menu()
     mCategories[3].name = "stage";
     mCategories[3].components.allocBuffer(3, nullptr);
     mCategories[3].components.pushBack(new EnumMenuComponent<int>(&getConfig()->mSelectedStageIdx, sStageNames, "Stage", false, false));
-    mCategories[3].components.pushBack(new IntMenuComponent<int>(&getConfig()->mSelectedScenario, "scenario", -1, 14, true));
+    mCategories[3].components.pushBack(new IntMenuComponent<int>(&getConfig()->mSelectedScenario, "scenario", 0, 14, true));
     mCategories[3].components.pushBack(new ButtonMenuComponent(
         "go", [this]() {
             if (mScene && mScene->mIsAlive) {
@@ -128,7 +131,10 @@ Menu::Menu()
                 if (holder)
 
                 {
-                    ChangeStageInfo info = ChangeStageInfo(holder, "start", sStageNames[getConfig()->mSelectedStageIdx], false, getConfig()->mSelectedScenario, { 0 });
+                    int scenario = getConfig()->mSelectedScenario;
+                    if (scenario == 0)
+                        scenario = -1;
+                    ChangeStageInfo info = ChangeStageInfo(holder, "start", sStageNames[getConfig()->mSelectedStageIdx], false, scenario, { 0 });
                     holder->changeNextStage(&info, 0);
                 }
             }
@@ -136,11 +142,12 @@ Menu::Menu()
         true));
 
     mCategories[4].name = "settings";
-    mCategories[4].components.allocBuffer(1, nullptr);
+    mCategories[4].components.allocBuffer(2, nullptr);
     static constexpr const char* languageNames[] {
         "English", "日本語", "Deutsch"
     };
     mCategories[4].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->currentLanguage), languageNames, "Language", false, false));
+    mCategories[4].components.pushBack(new IntMenuComponent<int>(&getConfig()->mWheelDelayFrames, "wheeltime", 1, 40, true));
 
     mComponents.allocBuffer(4, nullptr);
     mComponents.pushBack(new QuickActionMenu(*this));
@@ -185,7 +192,12 @@ void Menu::draw()
             callAction(getConfig()->mDLeftBind);
         if (al::isPadTriggerRight(-1))
             callAction(getConfig()->mDRightBind);
-
+        if ((al::isPadHoldZL(-1) and al::isPadTriggerZR(-1)) or (al::isPadHoldZR(-1) and al::isPadTriggerZL(-1)))
+            callAction(getConfig()->mZLZRBind);
+        if (al::isPadHoldPressRightStick(-1) && al::isPadTriggerL(-1))
+            callAction(getConfig()->mRsLBind);
+        if (al::isPadHoldPressRightStick(-1) && al::isPadTriggerR(-1))
+            callAction(getConfig()->mRsRBind);
         return;
     }
 
@@ -342,7 +354,6 @@ void Menu::loadPosition(al::LiveActor* playerBase)
 
 void Menu::callAction(ActionType type)
 {
-
     if (mScene && mScene->mIsAlive) {
         const al::Nerve* nrv = mScene->getNerveKeeper()->getCurrentNerve();
         bool allowedNerve = (nrv == util::getNerveAt(offsets::StageSceneNrvPlay) || nrv == util::getNerveAt(offsets::StageSceneNrvShineGet));

@@ -40,6 +40,9 @@ struct UserConfig {
     ActionType mDLeftBind = ActionType::None;
     ActionType mDRightBind = ActionType::None;
     ActionType mQuickMenuBinds[8] { ActionType::None };
+    ActionType mRsLBind = ActionType::None;
+    ActionType mRsRBind = ActionType::None;
+    ActionType mZLZRBind = ActionType::None;
     ImVec2 mTimerPos = ImVec2(1600.f / 2, 900.f / 2);
     bool mTimerEnabled = false;
     bool mTimerIsRTA = true;
@@ -58,6 +61,7 @@ struct UserConfig {
     MofumofuPattern mCurPattern = Random;
     int mSelectedStageIdx = 0;
     int mSelectedScenario = 0;
+    int mWheelDelayFrames = 1;
 
     struct MofumofuPatternEntry {
         const char* typeStr;

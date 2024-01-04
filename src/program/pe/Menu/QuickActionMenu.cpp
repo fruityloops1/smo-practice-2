@@ -37,7 +37,7 @@ bool QuickActionMenu::isPressStickTime()
         mStickPressTimer++;
     else
         mStickPressTimer = 0;
-    return mStickPressTimer >= 20;
+    return mStickPressTimer >= getConfig()->mWheelDelayFrames;
 }
 
 void QuickActionMenu::draw()
