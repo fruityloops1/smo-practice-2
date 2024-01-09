@@ -86,8 +86,8 @@ void QuickActionMenu::draw()
             ImGui::GetForegroundDrawList()->AddCircleFilled(pos, (isHovered ? 70 : 50) * easeOutQuad(progress), circleColor);
 
             float fontSize = 1 + progress * (isHovered ? 40 : 14);
-            char buffer[8] { 0 };
-            snprintf(buffer, 8, "action%d", int(getConfig()->mQuickMenuBinds[i]));
+            char buffer[16] { 0 };
+            snprintf(buffer, 16, "action%d", int(getConfig()->mQuickMenuBinds[i]));
             const char* str = pe::getLocalizedString(buffer);
             const ImVec2 size = ImGui::GetIO().Fonts->Fonts[0]->CalcTextSizeA(fontSize, FLT_MAX, 0.f, str);
 
