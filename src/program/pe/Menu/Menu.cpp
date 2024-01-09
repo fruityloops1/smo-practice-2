@@ -4,6 +4,7 @@
 #include "Player/PlayerActorHakoniwa.h"
 #include "Scene/ChangeStageInfo.h"
 #include "Scene/SceneObjUtil.h"
+#include "Scene/StageScene.h"
 #include "System/GameDataFunction.h"
 #include "System/GameDataHolder.h"
 #include "al/Library/Controller/JoyPadUtil.h"
@@ -364,6 +365,11 @@ void Menu::callAction(ActionType type)
             switch (type) {
             case ActionType::KillScene: {
                 mScene->kill();
+                return;
+            }
+            case ActionType::PrevScene: {
+                StageScene* scene = static_cast<StageScene*>(mScene);
+                scene->mHolder->returnPrevStage();
                 return;
             }
             case ActionType::SavePosition: {
