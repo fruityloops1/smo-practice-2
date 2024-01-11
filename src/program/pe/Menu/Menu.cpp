@@ -24,6 +24,7 @@
 #include "pe/Menu/ChangeStage.h"
 #include "pe/Menu/DummyMenuComponent.h"
 #include "pe/Menu/EnumMenuComponent.h"
+#include "pe/Menu/InputDisplay.h"
 #include "pe/Menu/IntMenuComponent.h"
 #include "pe/Menu/MenuComponent.h"
 #include "pe/Menu/MofumofuPatternUpdateNotification.h"
@@ -93,7 +94,7 @@ Menu::Menu()
     mCategories[0].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mCurPattern), patternNames, "mofumofupattern", false, true));
 
     mCategories[1].name = "timer";
-    mCategories[1].components.allocBuffer(6, nullptr);
+    mCategories[1].components.allocBuffer(5, nullptr);
     mCategories[1].components.pushBack(new BoolMenuComponent(&getConfig()->mTimerEnabled, "timer"));
     mCategories[1].components.pushBack(new IntMenuComponent<float>(&getConfig()->mTimerFontSize, "fontsize", 8, 100, true));
     mCategories[1].components.pushBack(new Vector2MenuComponent(&getConfig()->mTimerPos, "position", true, ImVec2(0, 0), ImVec2(1600, 900)));
@@ -101,31 +102,40 @@ Menu::Menu()
         "timer0", "timer1", "timer2"
     };
     mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mTimerStartType), timerNames, "timerstart", true));
-    mCategories[1].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mTimerEndType), timerNames, "timerend", true));
     mCategories[1].components.pushBack(new BoolMenuComponent(&getConfig()->mTimerSplit, "timersplit"));
 
-    mCategories[2].name = "keybinds";
-    mCategories[2].components.allocBuffer(15, nullptr);
-    mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDUpBind), sActionNames, "dpadup", true));
-    mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDDownBind), sActionNames, "dpaddown", true));
-    mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDLeftBind), sActionNames, "dpadleft", true));
-    mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDRightBind), sActionNames, "dpadright", true));
-    mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mRsLBind), sActionNames, "rsl", true));
-    mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mRsRBind), sActionNames, "rsr", true));
-    mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mZLZRBind), sActionNames, "zlzr", true));
+    mCategories[2].name = "inputdisplay";
+    mCategories[2].components.allocBuffer(8, nullptr);
+    mCategories[2].components.pushBack(new BoolMenuComponent(&getConfig()->mInputDisplayEnabled, "inputdisplay"));
+    mCategories[2].components.pushBack(new Vector2MenuComponent(&getConfig()->mInputDisplayPos, "position", true, ImVec2(0, 0), ImVec2(1600, 900)));
+    mCategories[2].components.pushBack(new EnumMenuComponent<u8>(reinterpret_cast<u8*>(&getConfig()->mInputDisplayButtonColor), sInputDisplayColorNames, "Button Color", false, false));
+    mCategories[2].components.pushBack(new EnumMenuComponent<u8>(reinterpret_cast<u8*>(&getConfig()->mInputDisplayButtonPressedColor), sInputDisplayColorNames, "Pressed Color", false, false));
+    mCategories[2].components.pushBack(new EnumMenuComponent<u8>(reinterpret_cast<u8*>(&getConfig()->mInputDisplayStickColor), sInputDisplayColorNames, "Stick Color", false, false));
+    mCategories[2].components.pushBack(new EnumMenuComponent<u8>(reinterpret_cast<u8*>(&getConfig()->mInputDisplayRingColor), sInputDisplayColorNames, "Ring Color", false, false));
+    mCategories[2].components.pushBack(new EnumMenuComponent<u8>(reinterpret_cast<u8*>(&getConfig()->mInputDisplayBackColor), sInputDisplayColorNames, "BG Color", false, false));
+
+    mCategories[3].name = "keybinds";
+    mCategories[3].components.allocBuffer(15, nullptr);
+    mCategories[3].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDUpBind), sActionNames, "dpadup", true));
+    mCategories[3].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDDownBind), sActionNames, "dpaddown", true));
+    mCategories[3].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDLeftBind), sActionNames, "dpadleft", true));
+    mCategories[3].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mDRightBind), sActionNames, "dpadright", true));
+    mCategories[3].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mRsLBind), sActionNames, "rsl", true));
+    mCategories[3].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mRsRBind), sActionNames, "rsr", true));
+    mCategories[3].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mZLZRBind), sActionNames, "zlzr", true));
 
     static constexpr const char* wheelNames[] {
         "wheel1", "wheel2", "wheel3", "wheel4", "wheel5", "wheel6", "wheel7", "wheel8"
     };
     for (int i = 0; i < 8; i++) {
-        mCategories[2].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mQuickMenuBinds[i]), sActionNames, wheelNames[i], true));
+        mCategories[3].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->mQuickMenuBinds[i]), sActionNames, wheelNames[i], true));
     }
 
-    mCategories[3].name = "stage";
-    mCategories[3].components.allocBuffer(3, nullptr);
-    mCategories[3].components.pushBack(new EnumMenuComponent<int>(&getConfig()->mSelectedStageIdx, sStageNames, "Stage", false, false));
-    mCategories[3].components.pushBack(new IntMenuComponent<int>(&getConfig()->mSelectedScenario, "scenario", 0, 14, true));
-    mCategories[3].components.pushBack(new ButtonMenuComponent(
+    mCategories[4].name = "stage";
+    mCategories[4].components.allocBuffer(3, nullptr);
+    mCategories[4].components.pushBack(new EnumMenuComponent<int>(&getConfig()->mSelectedStageIdx, sStageNames, "Stage", false, false));
+    mCategories[4].components.pushBack(new IntMenuComponent<int>(&getConfig()->mSelectedScenario, "scenario", 0, 14, true));
+    mCategories[4].components.pushBack(new ButtonMenuComponent(
         "go", [this]() {
             if (mScene && mScene->mIsAlive) {
                 GameDataHolder* holder = (GameDataHolder*)al::getSceneObj(mScene, 20);
@@ -142,18 +152,21 @@ Menu::Menu()
         },
         true));
 
-    mCategories[4].name = "settings";
-    mCategories[4].components.allocBuffer(2, nullptr);
+    mCategories[5].name = "settings";
+    mCategories[5].components.allocBuffer(3, nullptr);
     static constexpr const char* languageNames[] {
         "English", "日本語", "Deutsch"
     };
-    mCategories[4].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->currentLanguage), languageNames, "Language", false, false));
-    mCategories[4].components.pushBack(new IntMenuComponent<int>(&getConfig()->mWheelDelayFrames, "wheeltime", 1, 40, true));
+    mCategories[5].components.pushBack(new EnumMenuComponent<int>(reinterpret_cast<int*>(&getConfig()->currentLanguage), languageNames, "Language", false, false));
+    mCategories[5].components.pushBack(new IntMenuComponent<int>(&getConfig()->mWheelDelayFrames, "wheeltime", 1, 40, true));
+    static constexpr const char* stickNames[] { "left", "right" };
+    mCategories[5].components.pushBack(new EnumMenuComponent<u8>(reinterpret_cast<u8*>(&getConfig()->mWheelActivatedPressRightStick), stickNames, "wheelstick", true, true));
 
-    mComponents.allocBuffer(4, nullptr);
+    mComponents.allocBuffer(5, nullptr);
     mComponents.pushBack(new QuickActionMenu(*this));
     mComponents.pushBack(new Timer);
     mComponents.pushBack(new MofumofuPatternUpdateNotification);
+    mComponents.pushBack(new InputDisplay);
 }
 
 void Menu::update(al::Scene* scene)
@@ -246,7 +259,7 @@ void Menu::drawExpandedCategory()
         subY += size.y;
     }
 
-    ImGui::GetForegroundDrawList()->AddRectFilled(ImVec2(mBgSize.x, y), ImVec2(mBgSize.x + subX, y + subY), IM_COL32(0, 0, 0, 128));
+    // ImGui::GetForegroundDrawList()->AddRectFilled(ImVec2(mBgSize.x, y), ImVec2(mBgSize.x + subX, y + subY), IM_COL32(0, 0, 0, 128), 15);
 
     getCurrentCategory().components[mCurrentComponentInCategory]->setIsHovered(true);
 
@@ -258,10 +271,10 @@ void Menu::drawExpandedCategory()
                 continue;
 
             ImVec2 size = component->getSize();
-            ImGui::GetForegroundDrawList()->AddRectFilled(ImVec2(mBgSize.x, y + subY), ImVec2(mBgSize.x + subX, y + subY + size.y), IM_COL32(0, 0, 0, 128));
+            ImGui::GetForegroundDrawList()->AddRectFilled(ImVec2(mBgSize.x, y + subY), ImVec2(mBgSize.x + subX, y + subY + size.y), IM_COL32(0, 0, 0, 128), 15);
             if (mCurrentComponentInCategory == i) {
                 ImU32 color = mIsFocusedOnCurrentComponent ? IM_COL32(255, 60, 60, 76) : IM_COL32(255, 255, 255, 76);
-                ImGui::GetForegroundDrawList()->AddRectFilled(ImVec2(mBgSize.x, y + subY), ImVec2(mBgSize.x + subX, y + subY + size.y), color);
+                ImGui::GetForegroundDrawList()->AddRectFilled(ImVec2(mBgSize.x, y + subY), ImVec2(mBgSize.x + subX, y + subY + size.y), color, 15);
             }
             component->draw(ImVec2(mBgSize.x, y + subY));
             component->setIsHovered(false);

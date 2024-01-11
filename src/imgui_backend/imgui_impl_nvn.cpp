@@ -496,7 +496,7 @@ void InitBackend(const NvnBackendInitInfo& initInfo)
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     FsHelper::LoadData loadData = {
-        .path = "content:/ImGuiData/Fonts/SFMonoSquare-Regular.otf"
+        .path = "content:/ImGuiData/Fonts/RodinNTLG-Bold.otf"
     };
 
     FsHelper::loadFileFromPath(loadData);

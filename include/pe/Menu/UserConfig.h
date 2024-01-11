@@ -2,6 +2,7 @@
 
 #include "imgui.h"
 #include "pe/Menu/Action.h"
+#include "pe/Menu/InputDisplay.h"
 #include "pe/Menu/Timer.h"
 #include "pe/Util/Localization.h"
 
@@ -49,9 +50,13 @@ struct UserConfig {
     bool mTimerSplit = true;
     float mTimerFontSize = 50;
     TimerHookType mTimerStartType = TimerHookType::None;
-    TimerHookType mTimerEndType = TimerHookType::None;
     bool mInputDisplayEnabled = true;
     ImVec2 mInputDisplayPos = ImVec2(1600.f / 2, 900.f / 2);
+    InputDisplayColor mInputDisplayButtonColor = InputDisplayColor::White;
+    InputDisplayColor mInputDisplayButtonPressedColor = InputDisplayColor::Pink;
+    InputDisplayColor mInputDisplayStickColor = InputDisplayColor::White;
+    InputDisplayColor mInputDisplayRingColor = InputDisplayColor::Gray;
+    InputDisplayColor mInputDisplayBackColor = InputDisplayColor::Black;
 
     bool mIsBgmDisabled = false;
     bool mIsShineRefreshEnabled = false;
@@ -62,6 +67,7 @@ struct UserConfig {
     int mSelectedStageIdx = 0;
     int mSelectedScenario = 0;
     int mWheelDelayFrames = 1;
+    bool mWheelActivatedPressRightStick = false;
 
     struct MofumofuPatternEntry {
         const char* typeStr;

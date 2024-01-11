@@ -33,7 +33,7 @@ static float calcDistance(const ImVec2& vec1, const ImVec2& vec2)
 
 bool QuickActionMenu::isPressStickTime()
 {
-    if (al::isPadHoldPressLeftStick(-1))
+    if (getConfig()->mWheelActivatedPressRightStick ? al::isPadHoldPressRightStick(-1) : al::isPadHoldPressLeftStick(-1))
         mStickPressTimer++;
     else
         mStickPressTimer = 0;

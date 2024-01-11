@@ -27,7 +27,7 @@ struct MenuCategory {
 class Menu {
     bool mIsEnabled = true;
     sead::PtrArray<IComponent> mComponents;
-    MenuCategory mCategories[5];
+    MenuCategory mCategories[6];
     int mCurrentCategory = 0;
     bool mIsExpandedCurrentCategory = false;
     int mCurrentComponentInCategory = 0;
@@ -76,7 +76,7 @@ public:
     __attribute__((noinline)) void savePosition(al::LiveActor* playerBase);
     __attribute__((noinline)) void loadPosition(al::LiveActor* playerBase);
 
-    static constexpr int sCategoryFontSize = 50;
+    static constexpr int sCategoryFontSize = 25;
     static constexpr int sCategorySpacing = 4;
 };
 
