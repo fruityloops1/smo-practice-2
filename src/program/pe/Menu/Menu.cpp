@@ -391,14 +391,13 @@ void Menu::callAction(ActionType type)
 
                 return;
             }
-            case ActionType::LoadPosition: {
-                if (playerBase)
-                    loadPosition(playerBase);
-                return;
-            }
-            case ActionType::LifeMaxUp:
+            case ActionType::LifeMaxUp: {
                 GameDataFunction::getLifeMaxUpItem(static_cast<PlayerActorHakoniwa*>(playerBase));
                 return;
+            }
+            case ActionType::HealMario: 
+                GameDataFunction::recoveryPlayer(static_cast<PlayerActorHakoniwa*>(playerBase));
+                return;    
             default:
                 break;
             }
