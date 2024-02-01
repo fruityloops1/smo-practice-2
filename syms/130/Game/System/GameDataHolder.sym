@@ -1,2 +1,4 @@
 _ZN14GameDataHolder15changeNextStageEPK15ChangeStageInfoi = __main_start + 0x004db060;
 _ZN14GameDataHolder15returnPrevStageEv = __main_start + 0x004db150;
+
+_ZN12GameDataFile7addCoinEi = __main_start + 0x004CC1C0;

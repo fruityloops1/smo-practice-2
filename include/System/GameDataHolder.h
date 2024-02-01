@@ -2,10 +2,12 @@
 
 #include <sead/basis/seadTypes.h>
 
-class GameDataFile;
+class GameDataFile {
+public:
+    void addCoin(int amount);
+};
 
-class GameDataHolder /*: public al::GameDataHolderBase*/
-{
+class GameDataHolder {
 public:
     // GameDataHolder(al::MessageSystem const *);
     GameDataHolder();
@@ -79,4 +81,9 @@ public:
     void changeNextStage(struct ChangeStageInfo const*, int);
 
     int findUseScenarioNo(char const*);
+
+    void* ball;
+    void* mMessageSystem = nullptr;
+    GameDataFile** mFiles;
+    GameDataFile* mPlayingFile;
 };

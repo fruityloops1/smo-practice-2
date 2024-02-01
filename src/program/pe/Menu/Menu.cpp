@@ -134,7 +134,7 @@ Menu::Menu()
     mCategories[4].name = "stage";
     mCategories[4].components.allocBuffer(3, nullptr);
     mCategories[4].components.pushBack(new EnumMenuComponent<int>(&getConfig()->mSelectedStageIdx, sStageNames, "Stage", false, false));
-    mCategories[4].components.pushBack(new IntMenuComponent<int>(&getConfig()->mSelectedScenario, "scenario", 0, 14, true));
+    mCategories[4].components.pushBack(new IntMenuComponent<int>(&getConfig()->mSelectedScenario, "scenario", 0, 15, true));
     mCategories[4].components.pushBack(new ButtonMenuComponent(
         "go", [this]() {
             if (mScene && mScene->mIsAlive) {
@@ -403,6 +403,16 @@ void Menu::callAction(ActionType type)
             case ActionType::HealMario:
                 GameDataFunction::recoveryPlayer(static_cast<PlayerActorHakoniwa*>(playerBase));
                 return;
+            case ActionType::Add1000Coin: {
+                StageScene* scene = static_cast<StageScene*>(mScene);
+                scene->mHolder->mPlayingFile->addCoin(1000);
+                return;
+            }
+            case ActionType::Sub1000Coin: {
+                StageScene* scene = static_cast<StageScene*>(mScene);
+                scene->mHolder->mPlayingFile->addCoin(-1000);
+                return;
+            }
             default:
                 break;
             }
