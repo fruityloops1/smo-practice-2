@@ -170,11 +170,11 @@ constexpr MsgEntry sLocalizationData[] {
             "Mario Heilen" } },
     { "action12",
         { "Add 1000 Coins",
-            "Add 1000 Coins",
+            "+1000コイン",
             "+1000 Münzen" } },
     { "action13",
         { "Subtract 1000 Coins",
-            "Subtract 1000 Coins",
+            "-1000コイン",
             "-1000 Münzen" } },
 
     { "grayshinerefresh",
