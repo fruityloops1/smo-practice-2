@@ -176,6 +176,10 @@ constexpr MsgEntry sLocalizationData[] {
         { "Subtract 1000 Coins",
             "-1000コイン",
             "-1000 Münzen" } },
+    { "action14",
+        { "Warp to last Checkpoint",
+            "Warp to last Checkpoint",
+            "Zum letzten Checkpoint warpen" } },
 
     { "grayshinerefresh",
         { "Gray Moon Refresh",

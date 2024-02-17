@@ -1,10 +1,12 @@
 #include "pe/Hacks/PracticeHacks.h"
 #include "Layout/MapLayout.h"
 #include "Scene/StageScene.h"
+#include "Scene/StageSceneStateStageMap.h"
 #include "System/GameDataHolderWriter.h"
 #include "al/Library/Audio/AudioKeeper.h"
 #include "al/Library/Controller/JoyPadUtil.h"
 #include "al/Library/Math/MathRandomUtil.h"
+#include "al/Library/Nerve/NerveUtil.h"
 #include "hook/trampoline.hpp"
 #include "patch/code_patcher.hpp"
 #include "pe/Menu/Menu.h"
@@ -79,6 +81,21 @@ bool IsPadTriggerA::Callback(s32 port)
     return Orig(port);
 }
 
+static void setMapTargetUpdateNullNerve(al::IUseNerve* user, const al::Nerve* nerve)
+{
+    StageSceneStateStageMap* map;
+    __asm("mov %0, x19"
+          : "=r"(map));
+    void* mapThingPtr;
+    __asm("mov %0, x23"
+          : "=r"(mapThingPtr));
+
+    if (mapThingPtr != nullptr)
+        Menu::instance()->setLatestMapTarget(mapThingPtr);
+
+    al::setNerve(user, nerve);
+}
+
 void installPracticeHacks()
 {
     using Patcher = exl::patch::CodePatcher;
@@ -94,6 +111,8 @@ void installPracticeHacks()
     Patcher(0x004742d0).BranchLinkInst((void*)isEnableSave);
     Patcher(0x004b1c78).BranchLinkInst((void*)isEnableSave);
     Patcher(0x004b4fa4).BranchLinkInst((void*)isEnableSave);
+
+    Patcher(0x0049d3d0).BranchLinkInst((void*)setMapTargetUpdateNullNerve);
     IsPadTriggerA::InstallAtOffset(0x005cfbd0);
 
     exl::util::RwPages a(exl::util::modules::GetTargetOffset(offsets::ShineRefreshText), 24);

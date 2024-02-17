@@ -38,6 +38,7 @@ class Menu {
     sead::Vector3f mSavedPosition;
     sead::Quatf mSavedQuat;
     bool mIsSavedPos = false;
+    void* mLastMapTarget = nullptr;
 
     int mTimer = 0;
 
@@ -78,6 +79,8 @@ public:
 
     static constexpr int sCategoryFontSize = 25;
     static constexpr int sCategorySpacing = 4;
+
+    void setLatestMapTarget(void* target) { mLastMapTarget = target; }
 };
 
 } // namespace pe

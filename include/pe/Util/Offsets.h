@@ -18,6 +18,7 @@ namespace offsets {
     const uintptr_t StageSceneNrvPause = 0x012c5e48;
     const uintptr_t StageSceneNrvPlay = 0x012c5eb8;
     const uintptr_t StageSceneNrvShineGet = 0x012c5dc0;
+    const uintptr_t StageSceneNrvWarpToCheckpoint = 0x012c5f30;
 
     const uintptr_t PlayerActorHakoniwaVft = 0x012b1ef8;
     const uintptr_t ShineVft = 0x01202f00;
@@ -33,6 +34,7 @@ namespace offsets {
 
     const uintptr_t ShineGrabHook = 0x001b4e00;
     const uintptr_t ShineTickHook = 0x001dfd94;
+
 #endif
 
 } // namespace offsets

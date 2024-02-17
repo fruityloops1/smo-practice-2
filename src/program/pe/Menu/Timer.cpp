@@ -69,7 +69,12 @@ void Timer::event(TimerHookType type)
 
 void Timer::showSplit()
 {
-    mShowSplitTick = nn::os::GetSystemTick();
+    auto tick = nn::os::GetSystemTick();
+    if (!mIsRunning) {
+        mStartTick = tick;
+        mEndTick = tick;
+    }
+    mShowSplitTick = tick;
 }
 
 void Timer::draw()

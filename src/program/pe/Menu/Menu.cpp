@@ -413,6 +413,14 @@ void Menu::callAction(ActionType type)
                 scene->mHolder->mPlayingFile->addCoin(-1000);
                 return;
             }
+            case ActionType::WarpCheckpoint: {
+                StageScene* scene = static_cast<StageScene*>(mScene);
+                if (mLastMapTarget) {
+                    scene->mStateCollection->mStateStageMap->mMapThing = mLastMapTarget;
+                    al::setNerve(scene, pe::util::getNerveAt(offsets::StageSceneNrvWarpToCheckpoint));
+                }
+                return;
+            }
             default:
                 break;
             }
