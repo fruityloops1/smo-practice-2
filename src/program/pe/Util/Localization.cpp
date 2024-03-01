@@ -178,7 +178,7 @@ constexpr MsgEntry sLocalizationData[] {
             "-1000 Münzen" } },
     { "action14",
         { "Warp to last Checkpoint",
-            "Warp to last Checkpoint",
+            "前の旗に飛ぶ",
             "Zum letzten Checkpoint warpen" } },
     { "action15",
         { "Kill Mario",
