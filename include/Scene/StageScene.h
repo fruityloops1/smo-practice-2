@@ -16,6 +16,6 @@ public:
 
     u8 _D8[0x98];
     StageSceneStateCollectionList* mStateCollection = nullptr;
-    u8 _178[0x90];
+    u8 _178[0x168];
     GameDataHolder* mHolder = nullptr;
 };

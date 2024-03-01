@@ -2,6 +2,7 @@
 #include "MapObj/Shine.h"
 #include "MapObj/TreasureBox.h"
 #include "Player/PlayerActorHakoniwa.h"
+#include "Player/PlayerDamageKeeper.h"
 #include "Scene/ChangeStageInfo.h"
 #include "Scene/SceneObjUtil.h"
 #include "Scene/StageScene.h"
@@ -418,6 +419,12 @@ void Menu::callAction(ActionType type)
                 if (mLastMapTarget) {
                     scene->mStateCollection->mStateStageMap->mMapThing = mLastMapTarget;
                     al::setNerve(scene, pe::util::getNerveAt(offsets::StageSceneNrvWarpToCheckpoint));
+                }
+                return;
+            }
+            case ActionType::KillMario: {
+                if (PlayerActorHakoniwa* player = util::typeCast<PlayerActorHakoniwa>((al::LiveActor*)playerBase)) {
+                    player->mPlayerDamageKeeper->dead();
                 }
                 return;
             }

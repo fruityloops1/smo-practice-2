@@ -180,6 +180,10 @@ constexpr MsgEntry sLocalizationData[] {
         { "Warp to last Checkpoint",
             "Warp to last Checkpoint",
             "Zum letzten Checkpoint warpen" } },
+    { "action15",
+        { "Kill Mario",
+            "Kill Mario",
+            "Töte mario" } },
 
     { "grayshinerefresh",
         { "Gray Moon Refresh",

@@ -17,7 +17,8 @@ enum class ActionType {
     HealMario,
     Add1000Coin,
     Sub1000Coin,
-    WarpCheckpoint
+    WarpCheckpoint,
+    KillMario
 };
 
 constexpr const char* sActionNames[] {
