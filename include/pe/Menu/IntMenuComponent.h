@@ -18,6 +18,7 @@ class IntMenuComponent : public MenuComponent {
     bool mLocalized = false;
     int mFontSize = 35;
     IntType mLowerLimit = 0, mUpperLimit = std::numeric_limits<IntType>::max();
+    int mHoldRightFrames = 0, mHoldLeftFrames = 0;
 
 public:
     IntMenuComponent(IntType* value, const char* title, IntType lowerLimit = 0, IntType upperLimit = std::numeric_limits<IntType>::max(), bool localized = false, int fontSize = 35)
@@ -48,9 +49,20 @@ public:
     void draw(const ImVec2& at) override
     {
         if (mIsFocused) {
-            if (al::isPadTriggerLeft(-1) && !al::isPadHoldL(-1))
+            if (!al::isPadHoldL(-1)) {
+                if (al::isPadHoldLeft(-1))
+                    mHoldLeftFrames++;
+                else
+                    mHoldLeftFrames = 0;
+            }
+            if (al::isPadHoldRight(-1))
+                mHoldRightFrames++;
+            else
+                mHoldRightFrames = 0;
+
+            if ((al::isPadTriggerLeft(-1) && !al::isPadHoldL(-1)) or (mHoldLeftFrames > 30 && (mHoldLeftFrames % 2) == 0))
                 (*mValue)--;
-            else if (al::isPadTriggerRight(-1))
+            else if (al::isPadTriggerRight(-1) or (mHoldRightFrames > 30 && (mHoldRightFrames % 2) == 0))
                 (*mValue)++;
 
             if (int(*mValue) < mLowerLimit)

@@ -64,6 +64,7 @@ struct UserConfig {
     bool mIsEnableAutosave = true;
     bool mIsEnableWarpsAlways = false;
     MofumofuPattern mCurPattern = Random;
+    bool mIsEnableDownthrowOnly = false;
     int mSelectedStageIdx = 0;
     int mSelectedScenario = 0;
     int mWheelDelayFrames = 1;

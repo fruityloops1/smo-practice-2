@@ -18,6 +18,7 @@ class EnumMenuComponent : public MenuComponent {
     bool mLocalized = false;
     bool mTitleLocalized = false;
     int mFontSize = 35;
+    int mHoldRightFrames = 0, mHoldLeftFrames = 0;
 
 public:
     template <int N>
@@ -54,9 +55,20 @@ public:
     void draw(const ImVec2& at) override
     {
         if (mIsFocused) {
-            if (al::isPadTriggerLeft(-1) && !al::isPadHoldL(-1))
+            if (!al::isPadHoldL(-1)) {
+                if (al::isPadHoldLeft(-1))
+                    mHoldLeftFrames++;
+                else
+                    mHoldLeftFrames = 0;
+            }
+            if (al::isPadHoldRight(-1))
+                mHoldRightFrames++;
+            else
+                mHoldRightFrames = 0;
+
+            if ((al::isPadTriggerLeft(-1) && !al::isPadHoldL(-1)) or (mHoldLeftFrames > 30 && (mHoldLeftFrames % 2) == 0))
                 (*mValue)--;
-            else if (al::isPadTriggerRight(-1))
+            else if (al::isPadTriggerRight(-1) or (mHoldRightFrames > 30 && (mHoldRightFrames % 2) == 0))
                 (*mValue)++;
 
             if (int(*mValue) < 0)

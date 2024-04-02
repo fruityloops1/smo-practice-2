@@ -96,6 +96,15 @@ static void setMapTargetUpdateNullNerve(al::IUseNerve* user, const al::Nerve* ne
     al::setNerve(user, nerve);
 }
 
+HOOK_DEFINE_TRAMPOLINE(IsThrowTypeRolling) { static bool Callback(void* thisPtr, const sead::Vector2f& motion); };
+
+bool IsThrowTypeRolling::Callback(void* thisPtr, const sead::Vector2f& motion)
+{
+    if (getConfig()->mIsEnableDownthrowOnly && motion.x == 0 && motion.y == 0)
+        return true;
+    return Orig(thisPtr, motion);
+}
+
 void installPracticeHacks()
 {
     using Patcher = exl::patch::CodePatcher;
@@ -114,6 +123,7 @@ void installPracticeHacks()
 
     Patcher(0x0049d3d0).BranchLinkInst((void*)setMapTargetUpdateNullNerve);
     IsPadTriggerA::InstallAtOffset(0x005cfbd0);
+    // IsThrowTypeRolling::InstallAtOffset(0x003f1530);
 
     exl::util::RwPages a(exl::util::modules::GetTargetOffset(offsets::ShineRefreshText), 24);
     strncpy((char*)a.GetRw(), "Practice Mod", 24);
