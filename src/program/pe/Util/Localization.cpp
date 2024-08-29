@@ -207,7 +207,7 @@ constexpr MsgEntry sLocalizationData[] {
             "Autosave" } },
     { "nocheckpointtouch",
         { "No checkpoint touch",
-            "No checkpoint touch",
+            "中間ポイントを記録しない",
             "No checkpoint touch" } },
 
     { "scenario", { "Scenario", "シナリオ", "Szenario" } },
