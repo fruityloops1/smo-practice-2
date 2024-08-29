@@ -34,6 +34,7 @@ namespace offsets {
 
     const uintptr_t ShineGrabHook = 0x001b4e00;
     const uintptr_t ShineTickHook = 0x001dfd94;
+    const uintptr_t CheckpointTouchHook = 0x0021dd90;
 
 #endif
 

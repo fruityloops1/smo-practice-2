@@ -5,6 +5,7 @@
 #include "System/GameDataHolderWriter.h"
 #include "al/Library/Audio/AudioKeeper.h"
 #include "al/Library/Controller/JoyPadUtil.h"
+#include "al/Library/LiveActor/LiveActor.h"
 #include "al/Library/Math/MathRandomUtil.h"
 #include "al/Library/Nerve/NerveUtil.h"
 #include "hook/trampoline.hpp"
@@ -105,6 +106,14 @@ bool IsThrowTypeRolling::Callback(void* thisPtr, const sead::Vector2f& motion)
     return Orig(thisPtr, motion);
 }
 
+HOOK_DEFINE_TRAMPOLINE(DoCheckpointTouchNotify) { static void Callback(al::LiveActor * checkpoint); };
+
+void DoCheckpointTouchNotify::Callback(al::LiveActor* checkpoint)
+{
+    if (!getConfig()->mDisableCheckpointTouching)
+        Orig(checkpoint);
+}
+
 void installPracticeHacks()
 {
     using Patcher = exl::patch::CodePatcher;
@@ -113,6 +122,7 @@ void installPracticeHacks()
     SetGotShine::InstallAtOffset(offsets::GameDataFunctionSetGotShine);
     StartBgm1::InstallAtOffset(offsets::StartBgm1);
     StartBgm2::InstallAtOffset(offsets::StartBgm2);
+    DoCheckpointTouchNotify::InstallAtOffset(offsets::CheckpointTouchHook);
 
     Patcher(0x000a46ec).BranchLinkInst((void*)getMofumofuTarget);
     Patcher(0x000a4698).BranchLinkInst((void*)isPatternReverse);

@@ -69,6 +69,7 @@ struct UserConfig {
     int mSelectedScenario = 0;
     int mWheelDelayFrames = 1;
     bool mWheelActivatedPressRightStick = false;
+    bool mDisableCheckpointTouching = false;
 
     struct MofumofuPatternEntry {
         const char* typeStr;
