@@ -379,10 +379,16 @@ void Menu::callAction(ActionType type)
             PlayerActorBase* playerBase = reinterpret_cast<PlayerActorBase*>(rs::getPlayerActor(mScene));
             switch (type) {
             case ActionType::KillScene: {
+                GameDataFunction::recoveryPlayer(static_cast<PlayerActorHakoniwa*>(playerBase));
+                GameDataFunction::recoveryPlayer(static_cast<PlayerActorHakoniwa*>(playerBase));
+
                 mScene->kill();
                 return;
             }
             case ActionType::PrevScene: {
+                GameDataFunction::recoveryPlayer(static_cast<PlayerActorHakoniwa*>(playerBase));
+                GameDataFunction::recoveryPlayer(static_cast<PlayerActorHakoniwa*>(playerBase));
+
                 StageScene* scene = static_cast<StageScene*>(mScene);
                 scene->mHolder->returnPrevStage();
                 return;
@@ -416,6 +422,9 @@ void Menu::callAction(ActionType type)
                 return;
             }
             case ActionType::WarpCheckpoint: {
+                GameDataFunction::recoveryPlayer(static_cast<PlayerActorHakoniwa*>(playerBase));
+                GameDataFunction::recoveryPlayer(static_cast<PlayerActorHakoniwa*>(playerBase));
+
                 StageScene* scene = static_cast<StageScene*>(mScene);
                 if (mLastMapTarget) {
                     scene->mStateCollection->mStateStageMap->mMapThing = mLastMapTarget;
